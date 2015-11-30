@@ -1,0 +1,7 @@
+- create folders
+- log option
+- class refactoring
+- custom queue
+- handle option
+- unsolved levels
+- multithreading
