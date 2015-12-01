@@ -12,7 +12,7 @@
 #include <boost/icl/interval_set.hpp>
 
 #include "level_set_parser.hpp"
-#include "preprocessor.hpp"
+#include "preparer.hpp"
 #include "solver.hpp"
 
 namespace fs = boost::filesystem;
