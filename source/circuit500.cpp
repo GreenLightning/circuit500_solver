@@ -40,6 +40,7 @@ int main(int argument_count, char **argument_values) {
 			"puts solutions in the 'data/solutions/' directory.\n\n"
 
 			"Options");
+
 		description.add_options()
 			("help",
 				"Prints this help message.")
@@ -83,9 +84,21 @@ int main(int argument_count, char **argument_values) {
 		if (variables.count("solve-all") && variables.count("solve"))
 			throw std::runtime_error("solve is not allowed if solve-all is used");
 
-		if (argument_count == 1 || variables.count("help")) {
+		if (variables.count("help")) {
 			std::cout << description << std::endl;
-			return EXIT_FAILURE;
+		}
+
+		fs::path ref_dir("data/reference/");
+
+		if (!fs::is_directory(ref_dir)) {
+			std::string error("could not find directory '" + ref_dir.string() + "'");
+			if (!variables.count("help"))
+				error.append("; use '--help' to get more information");
+			throw std::runtime_error(error);
+		}
+
+		if (argument_count == 1) { // No options
+			std::cout << "use '--help' to get usage information" << std::endl;
 		}
 
 		std::vector<fs::path> files_to_prepare;
