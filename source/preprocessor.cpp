@@ -5,12 +5,10 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
-#include <boost/icl/interval_set.hpp>
 
 #include "rgb_image.hpp"
 
 namespace fs = boost::filesystem;
-namespace icl = boost::icl;
 
 const int digit_width = 8;
 const int digit_height = 9;
@@ -29,18 +27,16 @@ const int area_height = 192;
 RGB_Image create_buffer(bool &error);
 RGB_Image **load_digits(bool &error);
 
-void process_files(RGB_Image &buffer, RGB_Image **digits, std::vector<fs::path> &files, icl::interval_set<int> &processed);
+void process_files(RGB_Image &buffer, RGB_Image **digits, std::vector<fs::path> &files);
 int process_file(RGB_Image &buffer, RGB_Image **digits, fs::path file);
 int find_level_number(RGB_Image **digits, RGB_Image &raw);
 
-icl::interval_set<int> prepare_files(std::vector<fs::path> &files) {
+void prepare_files(std::vector<fs::path> &files) {
 	bool error = false;
-	icl::interval_set<int> processed;
 	RGB_Image buffer = create_buffer(error);
 	RGB_Image **digits = load_digits(error);
-	if (!error) process_files(buffer, digits, files, processed);
+	if (!error) process_files(buffer, digits, files);
 	delete [] digits;
-	return processed;
 }
 
 RGB_Image create_buffer(bool &error) {
@@ -65,13 +61,12 @@ RGB_Image **load_digits(bool &error) {
 	return digits;
 }
 
-void process_files(RGB_Image &buffer, RGB_Image **digits, std::vector<fs::path> &files, icl::interval_set<int> &processed) {
+void process_files(RGB_Image &buffer, RGB_Image **digits, std::vector<fs::path> &files) {
 	int count = 0, total = files.size();
 	for (auto&& it : files) {
 		int progress = 100 * (++count) / total;
 		std::cout << std::setfill(' ') << std::setw(3) << progress << "%: " << it.generic_string() << ": ";
-		int result = process_file(buffer, digits, it);
-		if (result) processed.insert(result);
+		process_file(buffer, digits, it);
 	}
 }
 
