@@ -19,6 +19,11 @@ namespace fs = boost::filesystem;
 namespace icl = boost::icl;
 namespace opt = boost::program_options;
 
+bool create_directory_if_not_exists(fs::path path) {
+	if (fs::is_directory(path)) return true;
+	return fs::create_directory(path);
+}
+
 int main(int argument_count, char **argument_values) {
 	try {
 		opt::options_description description(
@@ -88,10 +93,10 @@ int main(int argument_count, char **argument_values) {
 			std::cout << description << std::endl;
 		}
 
-		fs::path ref_dir("data/reference/");
+		fs::path reference_dir("data/reference/");
 
-		if (!fs::is_directory(ref_dir)) {
-			std::string error("could not find directory '" + ref_dir.string() + "'");
+		if (!fs::is_directory(reference_dir)) {
+			std::string error("could not find directory '" + reference_dir.string() + "'");
 			if (!variables.count("help"))
 				error.append("; use '--help' to get more information");
 			throw std::runtime_error(error);
@@ -100,6 +105,11 @@ int main(int argument_count, char **argument_values) {
 		if (argument_count == 1) { // No options
 			std::cout << "use '--help' to get usage information" << std::endl;
 		}
+
+		create_directory_if_not_exists("data/levels/");
+		create_directory_if_not_exists("data/raw/");
+		create_directory_if_not_exists("data/solutions/");
+		create_directory_if_not_exists("data/logs/");
 
 		std::vector<fs::path> files_to_prepare;
 		icl::interval_set<int> levels_to_solve;

@@ -9,6 +9,7 @@
 #include <vector>
 #include <chrono>
 
+#include <boost/date_time.hpp>
 #include <boost/icl/interval_set.hpp>
 
 #include "rgb_image.hpp"
@@ -19,6 +20,7 @@
 using namespace std;
 using namespace std::chrono;
 
+namespace pt = boost::posix_time;
 namespace icl = boost::icl;
 
 const int maximum_number_of_taps = 6;
@@ -86,7 +88,13 @@ void solve_levels(icl::interval_set<int> &level_set) {
 	bool error = false;
 	RGB_Image **reference_images = load_reference_images(error);
 	if (!error) {
-		ofstream log("data/log.txt");
+		ostringstream logname;
+		pt::time_facet *facet = new pt::time_facet();
+		facet->format("%Y-%m-%d_%H.%M.%S");
+		logname.imbue(std::locale(logname.getloc(), facet));
+		logname << "data/logs/log_" << pt::microsec_clock::local_time() << ".txt";
+		std::cout << logname.str() << std::endl;
+		ofstream log(logname.str());
 		log << "level; solutions; nanoseconds\n";
 		for(icl::interval_set<int>::element_iterator level_it = elements_begin(level_set); level_it != elements_end(level_set); ++level_it) {
 			int level_number = *level_it;
