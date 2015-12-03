@@ -13,6 +13,7 @@
 #include <boost/icl/interval_set.hpp>
 
 #include "rgb_image.hpp"
+#include "logger.hpp"
 #include "solver/tile.hpp"
 #include "solver/board.hpp"
 #include "solver/reference.hpp"
@@ -88,34 +89,20 @@ void solve_levels(icl::interval_set<int> &level_set) {
 	bool error = false;
 	RGB_Image **reference_images = load_reference_images(error);
 	if (!error) {
-		ostringstream logname;
-		pt::time_facet *facet = new pt::time_facet();
-		facet->format("%Y-%m-%d_%H.%M.%S");
-		logname.imbue(std::locale(logname.getloc(), facet));
-		logname << "data/logs/log_" << pt::microsec_clock::local_time() << ".txt";
-		std::cout << logname.str() << std::endl;
-		ofstream log(logname.str());
-		log << "level; solutions; nanoseconds\n";
+		Logger logger;
 		for(icl::interval_set<int>::element_iterator level_it = elements_begin(level_set); level_it != elements_end(level_set); ++level_it) {
 			int level_number = *level_it;
 			cout << level_number << ": " << flush;
-			log << setw(5) << level_number << ";";
 			bool level_error = false;
 			ostringstream filename;
 			filename << "data/levels/level_" << setfill('0') << setw(3) << level_number << ".png";
 			Configuration *level = load_level(filename.str(), reference_images, level_error);
 			if (!level_error) {
-				long long int solutions_checked = 0;
-				high_resolution_clock::time_point t0 = high_resolution_clock::now();
+				long long int & solutions_checked = logger.start_search(level_number);
 				vector<Configuration> list = find_solution_list(*level, solutions_checked);
-				high_resolution_clock::time_point t1 = high_resolution_clock::now();
-				auto duration_ms = duration_cast<milliseconds>(t1 - t0).count();
-				cout << "checked " << solutions_checked << " solutions: ";
-				cout << "finding solutions took " << duration_ms << "ms: " << flush;
-				auto duration_ns = duration_cast<nanoseconds>(t1 - t0).count();
-				log << setw(10) << solutions_checked << ";" << setw(12) << duration_ns;
+				logger.stop_search();
 				if (!list.empty()) {
-					t0 = high_resolution_clock::now();
+					high_resolution_clock::time_point t0 = high_resolution_clock::now();
 					bool error = false;
 					int solution_width = solution_list_pixel_width(list);
 					int solution_height = solution_list_pixel_height(list);
@@ -130,15 +117,13 @@ void solve_levels(icl::interval_set<int> &level_set) {
 					} else {
 						cout << rgb_image_error_text() << flush;
 					}
-					t1 = high_resolution_clock::now();
-					duration_ms = duration_cast<milliseconds>(t1 - t0).count();
+					high_resolution_clock::time_point t1 = high_resolution_clock::now();
+					auto duration_ms = duration_cast<milliseconds>(t1 - t0).count();
 					cout << "saving image took " << duration_ms << "ms: " << flush;
 				}
 			}
 			free_level(level);
 			cout << "done" << endl;
-			log << "\n";
-			if (level_number % 10 == 0) log.flush();
 		}
 	}
 	free_reference_images(reference_images);
