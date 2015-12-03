@@ -9,7 +9,6 @@
 #include <vector>
 #include <chrono>
 
-#include <boost/date_time.hpp>
 #include <boost/icl/interval_set.hpp>
 
 #include "rgb_image.hpp"
@@ -23,7 +22,6 @@
 using namespace std;
 using namespace std::chrono;
 
-namespace pt = boost::posix_time;
 namespace icl = boost::icl;
 
 Configuration *load_level(string filename, RGB_Image **reference_images, bool &error);
