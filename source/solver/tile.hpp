@@ -26,7 +26,7 @@
  * 11 = other (empty or normal pipes)
  */
 
-typedef uint8_t Tile;
+typedef std::uint8_t Tile;
 
 const Tile tile_type_bits  = 0b00001100;
 const Tile tile_rotation_bits = 0b00000011;
@@ -45,25 +45,10 @@ enum Tile_Type : Tile {
 	tile_type_other = 0b1100
 };
 
-Tile create_gap() {
-	return tile_type_gap; 
-}
-
-Tile create_start(Tile_Direction dir) {
-	return dir | tile_type_start;
-}
-
-Tile create_end(Tile_Direction dir) {
-	return dir | tile_type_end;
-}
-
-Tile create_tile(bool up, bool right, bool down, bool left) {
-	return (up ? tile_direction_up : 0)
-	     | (right ? tile_direction_right : 0)
-	     | (down ? tile_direction_down : 0)
-	     | (left ? tile_direction_left : 0)
-	     | tile_type_other;
-}
+Tile create_gap();
+Tile create_start(Tile_Direction dir);
+Tile create_end(Tile_Direction dir);
+Tile create_tile(bool up, bool right, bool down, bool left);
 
 inline bool can_rotate(Tile t) { int matrix = t >> 4; return matrix != 0b0000 && matrix != 0b1111; }
 inline bool cannot_rotate(Tile t) { int matrix = t >> 4; return matrix == 0b0000 || matrix == 0b1111; }

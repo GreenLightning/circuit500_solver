@@ -14,6 +14,7 @@
 
 #include "rgb_image.hpp"
 #include "logger.hpp"
+#include "solver/solution_list.hpp"
 #include "solver/tile.hpp"
 #include "solver/board.hpp"
 #include "solver/reference.hpp"
@@ -114,42 +115,6 @@ Configuration *load_level(string filename, RGB_Image **reference_images, bool &e
 void free_level(Configuration *level) {
 	delete level;
 }
-
-class Solution_List {
-public:
-	Solution_List() : found(false) {}
-	bool should_skip(const Configuration &config) { return found && config.action_count > action_count; }
-	void append(const Configuration &config) {
-		if (!found) {
-			found = true;
-			tap_count = config.tap_count;
-			action_count = config.action_count;
-			solutions.push_back(config);
-		} else if (config.tap_count <= tap_count && config.action_count <= action_count) {
-			if (config.tap_count < tap_count || config.action_count < action_count) {
-				solutions.clear();
-				tap_count = config.tap_count;
-				action_count = config.action_count;
-				solutions.push_back(config);
-			} else {
-				bool found_equal = false;
-				for (auto &&solution : solutions) {
-					if (boards_are_equal(config.board, solution.board)) {
-						found_equal = true;
-						break;
-					}
-				}
-				if (!found_equal) solutions.push_back(config);
-			}
-		}
-	}
-	vector<Configuration> get() { return solutions; }
-private:
-	bool found;
-	uint8_t tap_count;
-	uint8_t action_count;
-	vector<Configuration> solutions;
-};
 
 void find_solution_helper(Solution_List &list, Board_State &state, long long int &solutions_checked, const Configuration &solution) {
 	++solutions_checked;
