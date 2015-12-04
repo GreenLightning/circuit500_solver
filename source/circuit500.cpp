@@ -33,9 +33,7 @@ int main(int argument_count, char **argument_values) {
 			"working directory, which should already exist and contain some reference images\n"
 			"for the solver inside 'data/reference/'.\n\n"
 
-			"Screenshots of the levels should be placed inside the 'data/raw/' directory.\n"
-			"Please create the directories 'data/levels/' and 'data/solutions/' if they do\n"
-			"not exist yet, or the solver will fail to save the images.\n\n"
+			"Screenshots of the levels should be placed inside the 'data/raw/' directory.\n\n"
 
 			"During the preparation phase the program extracts the level number from the\n"
 			"screenshots and places a normalized version of the level area in an\n"

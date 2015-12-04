@@ -43,7 +43,7 @@ Usage
 
 All operations are performed in the 'data/' directory relative to the current working directory, which should already exist and contain some reference images for the solver inside 'data/reference/'.
 
-Screenshots of the levels should be placed inside the 'data/raw/' directory. **Please create the directories 'data/levels/' and 'data/solutions/' if they do not exist yet, or the solver will fail to save the images.**
+Screenshots of the levels should be placed inside the 'data/raw/' directory.
 
 During the preparation phase the program extracts the level number from the screenshots and places a normalized version of the level area in an appropriately named file inside the 'data/levels/' directory.
 
