@@ -120,6 +120,8 @@ RGB_Image rgb_image_load(std::string filename, unsigned int expected_width, unsi
 }
 
 void rgb_image_save(std::string filename, RGB_Image &image, bool &error) {
+	if (error) return;
+	if (rgb_image_is_error(image)) return rgb_image_error_void(error, "image is invalid");
 	bool success = stbi_write_png(filename.c_str(), image.width, image.height, 3, image.data, image.stride);
 	if (!success) rgb_image_error_void(error, "failed to save image");
 }

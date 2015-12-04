@@ -30,13 +30,6 @@ void free_level(Configuration *level);
 
 vector<Configuration> find_solution_list(Configuration level, long long int &solutions_checked);
 
-int solution_list_pixel_width(vector<Configuration> &list);
-int solution_list_pixel_height(vector<Configuration> &list);
-void draw_solution_list(RGB_Image &destination, Configuration level, vector<Configuration> &list, RGB_Image **reference_images);
-int solution_pixel_width(Configuration solution);
-void draw_solution(RGB_Image &destination, Configuration level, Configuration solution, RGB_Image **reference_images);
-void draw_board(RGB_Image &destination, Board &board, Board_State &state, RGB_Image **reference_images);
-
 void solve_levels(icl::interval_set<int> &level_set) {
 	bool error = false;
 	RGB_Image **reference_images = load_reference_images(error);
@@ -56,19 +49,11 @@ void solve_levels(icl::interval_set<int> &level_set) {
 				if (!list.empty()) {
 					high_resolution_clock::time_point t0 = high_resolution_clock::now();
 					bool error = false;
-					int solution_width = solution_list_pixel_width(list);
-					int solution_height = solution_list_pixel_height(list);
-					RGB_Image test = rgb_image_create(solution_width + 2 * tile_size, solution_height + 2 * tile_size, 0x000000, error);
-					if (!error) {
-						RGB_Image dst = rgb_image_create_view(test, tile_size, tile_size, solution_width, solution_height, error);
-						draw_solution_list(dst, *level, list, reference_images);
-						ostringstream filename;
-						filename << "data/solutions/solution_" << setfill('0') << setw(3) << level_number << ".png";
-						rgb_image_save(filename.str(), test, error);
-						cout << (error ? rgb_image_error_text() : "success") << ": " << flush;
-					} else {
-						cout << rgb_image_error_text() << flush;
-					}
+					RGB_Image image = Solution_Painter(*level, list, reference_images).paint(error);
+					ostringstream filename;
+					filename << "data/solutions/solution_" << setfill('0') << setw(3) << level_number << ".png";
+					rgb_image_save(filename.str(), image, error);
+					cout << (error ? rgb_image_error_text() : "success") << ": " << flush;
 					high_resolution_clock::time_point t1 = high_resolution_clock::now();
 					auto duration_ms = duration_cast<milliseconds>(t1 - t0).count();
 					cout << "saving image took " << duration_ms << "ms: " << flush;
