@@ -51,13 +51,13 @@ During the solving phase the program attempts to solve the levels and puts solut
 
 Options:
 
- Option                  | Short Option | Description
--------------------------|--------------|------------
- --help                  |              | Prints help message.
- --prepare <filename>... | -p           | Prepares the specified files.  Must be followed by one or more filenames. Filenames must not include 'data/raw/'.
- --prepare-all           | -P           | Prepares all files in 'data/raw/'.
- --solve <X _or_ X-Y>... | -s           | Solves the specified levels. X and Y are level numbers between 1 and 500. Examples: 42, 1-100, etc.
- --solve-all             | -S           | Solves all levels.
+ Option                     | Short Option | Description
+----------------------------|--------------|------------
+ --help                     |              | Prints help message.
+ --prepare _filename_ ...   | -p           | Prepares the specified files.  Must be followed by one or more filenames. Filenames must not include 'data/raw/'.
+ --prepare-all              | -P           | Prepares all files in 'data/raw/'.
+ --solve _X **or** X‑Y_ ... | -s           | Solves the specified levels. X and Y are level numbers between 1 and 500. Examples: 42, 1-100, etc.
+ --solve-all                | -S           | Solves all levels.
 
 Dependencies
 ============
