@@ -6,7 +6,7 @@ This is a solver for [circuit500](https://itunes.apple.com/us/app/circuit500/id1
 Status
 ======
 
-This project is still **Work In Progress**. Currently, the solver is able to solve 401 out of the 500 levels (= 80.2 %!) in about 4 minutes (less than half a seconds per level on average).
+This project is still **Work In Progress**. Currently, the solver is able to solve 401 out of the 500 levels (= 80.2 %!) in about 4 minutes (less than half a second per level on average).
 
 Design
 ======
