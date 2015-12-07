@@ -5,9 +5,7 @@
 #include <fstream>
 #include <string>
 #include <cstring>
-#include <queue>
 #include <vector>
-#include <chrono>
 
 #include <boost/icl/interval_set.hpp>
 
@@ -20,15 +18,12 @@
 #include "solver/solution_list.hpp"
 #include "solver/solution_painter.hpp"
 
-using namespace std;
-using namespace std::chrono;
-
 namespace icl = boost::icl;
 
-Configuration *load_level(string filename, RGB_Image **reference_images, bool &error);
+Configuration *load_level(std::string filename, RGB_Image **reference_images, bool &error);
 void free_level(Configuration *level);
 
-vector<Configuration> find_solution_list(Configuration level, long long int &solutions_checked);
+std::vector<Configuration> find_solution_list(Configuration level, long long int &solutions_checked);
 
 void solve_levels(icl::interval_set<int> &level_set) {
 	bool error = false;
@@ -37,40 +32,36 @@ void solve_levels(icl::interval_set<int> &level_set) {
 		Logger logger;
 		for(icl::interval_set<int>::element_iterator level_it = elements_begin(level_set); level_it != elements_end(level_set); ++level_it) {
 			int level_number = *level_it;
-			cout << level_number << ": " << flush;
+			std::cout << level_number << ": " << std::flush;
 			bool level_error = false;
-			ostringstream filename;
-			filename << "data/levels/level_" << setfill('0') << setw(3) << level_number << ".png";
+			std::ostringstream filename;
+			filename << "data/levels/level_" << std::setfill('0') << std::setw(3) << level_number << ".png";
 			Configuration *level = load_level(filename.str(), reference_images, level_error);
 			if (!level_error) {
 				long long int & solutions_checked = logger.start_search(level_number);
-				vector<Configuration> list = find_solution_list(*level, solutions_checked);
+				std::vector<Configuration> list = find_solution_list(*level, solutions_checked);
 				logger.stop_search();
 				if (!list.empty()) {
-					high_resolution_clock::time_point t0 = high_resolution_clock::now();
 					bool error = false;
 					RGB_Image image = Solution_Painter(*level, list, reference_images).paint(error);
-					ostringstream filename;
-					filename << "data/solutions/solution_" << setfill('0') << setw(3) << level_number << ".png";
+					std::ostringstream filename;
+					filename << "data/solutions/solution_" << std::setfill('0') << std::setw(3) << level_number << ".png";
 					rgb_image_save(filename.str(), image, error);
-					cout << (error ? rgb_image_error_text() : "success") << ": " << flush;
-					high_resolution_clock::time_point t1 = high_resolution_clock::now();
-					auto duration_ms = duration_cast<milliseconds>(t1 - t0).count();
-					cout << "saving image took " << duration_ms << "ms: " << flush;
+					std::cout << (error ? rgb_image_error_text() : "success") << ": " << std::flush;
 				}
 			}
 			free_level(level);
-			cout << "done" << endl;
+			std::cout << "done" << std::endl;
 		}
 	}
 	free_reference_images(reference_images);
 }
 
-Configuration *load_level(string filename, RGB_Image **reference_images, bool &error) {
+Configuration *load_level(std::string filename, RGB_Image **reference_images, bool &error) {
 	if (error) return nullptr;
 	Configuration *config = new Configuration{0};
 	if (config == nullptr) {
-		cout << "Error: out of memory while allocating configuration." << endl;
+		std::cout << "Error: out of memory while allocating configuration." << std::endl;
 		error = true;
 		return nullptr;
 	}
@@ -85,13 +76,13 @@ Configuration *load_level(string filename, RGB_Image **reference_images, bool &e
 			if (reference_index < number_of_references) {
 				config->board[board_position(x, y)] = reference_tiles[reference_index];
 			} else {
-				cout << "Unknown tile found." << endl;
+				std::cout << "Unknown tile found." << std::endl;
 				error = true;
 			}
 		}
 	}
 	if (error) {
-		cout << "Error: " << rgb_image_error_text() << endl;
+		std::cout << "Error: " << rgb_image_error_text() << std::endl;
 	}
 	return config;
 }
@@ -114,7 +105,7 @@ void find_solution_helper(Solution_List &list, Board_State &state, long long int
 	}
 }
 
-vector<Configuration> find_solution_list(Configuration level, long long int &solutions_checked) {
+std::vector<Configuration> find_solution_list(Configuration level, long long int &solutions_checked) {
 	Solution_List list;
 	Board_State state;
 	find_solution_helper(list, state, solutions_checked, level);
