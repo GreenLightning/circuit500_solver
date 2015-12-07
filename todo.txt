@@ -1,7 +1,7 @@
-- create folders
 - log option
 - class refactoring
-- custom queue
 - handle option
 - unsolved levels
 - multithreading
+- log number of solutions
+- use boost format
