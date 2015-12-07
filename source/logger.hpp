@@ -1,25 +1,14 @@
 #ifndef LOGGER
 #define LOGGER
 
-#include <fstream>
-#include <chrono>
-
 class Logger {
 public:
-	Logger();
-	~Logger();
-	long long int &start_search(int level);
-	void stop_search();
-private:
-	std::ofstream log_file;
-	
-	int level_count;
-	long long int total_solutions;
-	std::chrono::nanoseconds total_time;
+	static Logger *create_file_logger();
+	static Logger *create_fake_logger();
 
-	int current_level;
-	long long int solutions_checked;
-	std::chrono::high_resolution_clock::time_point start;
+	virtual ~Logger() {}
+	virtual long long int &start_search(int level) = 0;
+	virtual void stop_search() = 0;
 };
 
 #endif

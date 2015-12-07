@@ -1,4 +1,3 @@
-- log option
 - class refactoring
 - handle option
 - unsolved levels

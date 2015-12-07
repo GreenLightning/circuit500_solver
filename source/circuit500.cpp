@@ -12,6 +12,7 @@
 #include <boost/icl/interval_set.hpp>
 
 #include "level_set_parser.hpp"
+#include "logger.hpp"
 #include "preparer.hpp"
 #include "solver.hpp"
 
@@ -47,6 +48,8 @@ int main(int argument_count, char **argument_values) {
 		description.add_options()
 			("help",
 				"Prints this help message.")
+			("log,l",
+				"Logs statistics about the solving phase into a log file inside 'data/logs/'.")
 			("prepare,p", opt::value<std::vector<std::string>>()->multitoken(),
 				"Prepares the specified files.\n"
 				"Must be followed by one or more filenames.\n"
@@ -133,8 +136,15 @@ int main(int argument_count, char **argument_values) {
 			levels_to_solve += Level_Set_Parser(input_list).parse();
 		}
 
+		Logger *logger = variables.count("log") ? Logger::create_file_logger() : Logger::create_fake_logger();
+		if (!logger) {
+			throw std::runtime_error("out of memory: failed to create logger");
+		}
+
 		prepare_files(files_to_prepare);
-		solve_levels(levels_to_solve);
+		solve_levels(levels_to_solve, *logger);
+
+		delete logger;
 
 		return EXIT_SUCCESS;
 	} catch(std::exception& e) {

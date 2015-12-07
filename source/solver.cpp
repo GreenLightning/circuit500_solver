@@ -25,11 +25,10 @@ void free_level(Configuration *level);
 
 std::vector<Configuration> find_solution_list(Configuration level, long long int &solutions_checked);
 
-void solve_levels(icl::interval_set<int> &level_set) {
+void solve_levels(icl::interval_set<int> &level_set, Logger &logger) {
 	bool error = false;
 	RGB_Image **reference_images = load_reference_images(error);
 	if (!error) {
-		Logger logger;
 		for(icl::interval_set<int>::element_iterator level_it = elements_begin(level_set); level_it != elements_end(level_set); ++level_it) {
 			int level_number = *level_it;
 			std::cout << level_number << ": " << std::flush;
