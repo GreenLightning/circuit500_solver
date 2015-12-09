@@ -50,6 +50,9 @@ int main(int argument_count, char **argument_values) {
 				"Prints this help message.")
 			("log,l",
 				"Logs statistics about the solving phase into a log file inside 'data/logs/'.")
+			("unsolved,u",
+				"Solves only those levels for which it cannot already find a solution inside\n"
+				"'data/solutions/'.")
 			("prepare,p", opt::value<std::vector<std::string>>()->multitoken(),
 				"Prepares the specified files.\n"
 				"Must be followed by one or more filenames.\n"
@@ -142,7 +145,7 @@ int main(int argument_count, char **argument_values) {
 		}
 
 		prepare_files(files_to_prepare);
-		solve_levels(levels_to_solve, *logger);
+		solve_levels(levels_to_solve, variables.count("unsolved"), *logger);
 
 		delete logger;
 

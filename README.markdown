@@ -55,6 +55,7 @@ Options:
 ----------------------------|--------------|------------
  --help                     |              | Prints help message.
  --log                      | -l           | Logs statistics about the solving phase into a log file inside 'data/logs/'.
+ --unsolved                 | -u           | Solves only those levels for which it cannot already find a solution inside 'data/solutions/'.
  --prepare _filename_ ...   | -p           | Prepares the specified files.  Must be followed by one or more filenames. Filenames must not include 'data/raw/'.
  --prepare-all              | -P           | Prepares all files in 'data/raw/'.
  --solve _X **or** X‑Y_ ... | -s           | Solves the specified levels. X and Y are level numbers between 1 and 500. Examples: 42, 1-100, etc.

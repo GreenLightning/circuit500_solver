@@ -2,4 +2,4 @@
 
 #include "logger.hpp"
 
-void solve_levels(boost::icl::interval_set<int> &level_set, Logger &logger);
+void solve_levels(boost::icl::interval_set<int> &level_set, bool unsolved, Logger &logger);
