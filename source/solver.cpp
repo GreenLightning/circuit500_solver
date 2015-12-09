@@ -31,7 +31,7 @@ void solve_level(int level_number, bool unsolved, Logger &logger, RGB_Image **re
 std::string level_filename(int level_number);
 std::string solution_filename(int level_number);
 
-std::vector<Configuration> find_solution_list(Configuration level, long long int &solutions_checked);
+Solution_List find_solution_list(Configuration level, long long int &solutions_checked);
 void find_solution_helper(Solution_List &list, Board_State &state, long long int &solutions_checked, const Configuration &solution);
 
 Configuration *load_level(std::string filename, RGB_Image **reference_images, bool &error) {
@@ -92,11 +92,11 @@ void solve_level(int level_number, bool unsolved, Logger &logger, RGB_Image **re
 	Configuration *level = load_level(level_filename(level_number), reference_images, level_error);
 	if (!level_error) {
 		long long int & solutions_checked = logger.start_search(level_number);
-		std::vector<Configuration> list = find_solution_list(*level, solutions_checked);
-		logger.stop_search();
+		Solution_List list = find_solution_list(*level, solutions_checked);
+		logger.stop_search(list.get_tap_count(), list.get_action_count());
 		if (!list.empty()) {
 			bool error = false;
-			RGB_Image image = Solution_Painter(*level, list, reference_images).paint(error);
+			RGB_Image image = Solution_Painter(*level, list.get_solutions(), reference_images).paint(error);
 			rgb_image_save(solution_name, image, error);
 			std::cout << (error ? rgb_image_error_text() : "success") << ": " << std::flush;
 		}
@@ -117,11 +117,11 @@ std::string solution_filename(int level_number) {
 	return filename.str();
 }
 
-std::vector<Configuration> find_solution_list(Configuration level, long long int &solutions_checked) {
+Solution_List find_solution_list(Configuration level, long long int &solutions_checked) {
 	Solution_List list;
 	Board_State state;
 	find_solution_helper(list, state, solutions_checked, level);
-	return list.get();
+	return list;
 }
 
 void find_solution_helper(Solution_List &list, Board_State &state, long long int &solutions_checked, const Configuration &solution) {

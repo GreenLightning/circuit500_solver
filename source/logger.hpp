@@ -8,7 +8,7 @@ public:
 
 	virtual ~Logger() {}
 	virtual long long int &start_search(int level) = 0;
-	virtual void stop_search() = 0;
+	virtual void stop_search(int taps, int actions) = 0;
 };
 
 #endif

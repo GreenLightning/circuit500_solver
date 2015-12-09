@@ -1,5 +1,3 @@
 - class refactoring
 - handle option
 - multithreading
-- log number of solutions
-- use boost format
