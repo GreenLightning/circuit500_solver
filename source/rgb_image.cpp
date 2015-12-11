@@ -38,36 +38,44 @@ RGB_Image::~RGB_Image() {
 	if (owns_data) delete [] data;
 }
 
-static std::string rgb_image_error;
+std::string RGB_Image::error_text = "";
 
-inline RGB_Image rgb_image_create_error() {
+inline bool RGB_Image::is_error() {
+	return data == nullptr;
+}
+
+std::string RGB_Image::get_error_text() {
+	return error_text;
+}
+
+inline RGB_Image RGB_Image::create_error() {
 	return RGB_Image();
 }
 
-inline void rgb_image_error_void(bool &error, std::string error_text) {
-	rgb_image_error = error_text;
+inline void RGB_Image::report_error_void(bool &error, std::string error_text) {
+	RGB_Image::error_text = error_text;
 	error = true;
 }
 
-inline bool rgb_image_error_bool(bool &error, std::string error_text) {
-	rgb_image_error_void(error, error_text);
+inline bool RGB_Image::report_error_bool(bool &error, std::string error_text) {
+	report_error_void(error, error_text);
 	return false;
 }
 
-inline RGB_Image rgb_image_error_img(bool &error, std::string error_text) {
-	rgb_image_error_void(error, error_text);
-	return rgb_image_create_error();
+inline RGB_Image RGB_Image::report_error_img(bool &error, std::string error_text) {
+	report_error_void(error, error_text);
+	return create_error();
 }
 
-RGB_Image rgb_image_create(unsigned int width, unsigned int height, bool &error) {
-	if (error) return rgb_image_create_error();
+RGB_Image RGB_Image::create(unsigned int width, unsigned int height, bool &error) {
+	if (error) return create_error();
 	unsigned char *data = new unsigned char[width * height * 3];
-	if (!data) return rgb_image_error_img(error, "out of memory");
+	if (!data) return report_error_img(error, "out of memory");
 	return RGB_Image(data, width, height, width * 3, true);
 }
 
-RGB_Image rgb_image_create(unsigned int width, unsigned int height, RGB_Image_Color color, bool &error) {
-	RGB_Image image = rgb_image_create(width, height, error);
+RGB_Image RGB_Image::create(unsigned int width, unsigned int height, RGB_Image_Color color, bool &error) {
+	RGB_Image image = create(width, height, error);
 	if (error) return image;
 	unsigned char r = (color >> 16) & 0xff, g = (color >> 8) & 0xff, b = color & 0xff;
 	for (unsigned int i = 0; i < width * height; ++i) {
@@ -78,62 +86,62 @@ RGB_Image rgb_image_create(unsigned int width, unsigned int height, RGB_Image_Co
 	return image;
 }
 
-RGB_Image rgb_image_create_copy(RGB_Image &image, bool &error) {
-	if (error) return rgb_image_create_error();
-	if (rgb_image_is_error(image)) return rgb_image_error_img(error, "image is invalid");
-	RGB_Image copy = rgb_image_create(image.width, image.height, error);
-	rgb_image_copy_from_to(image, copy, error);
-	return copy;
-}
-
-RGB_Image rgb_image_create_copy(RGB_Image &image, unsigned int x, unsigned int y, unsigned int width, unsigned int height, bool &error) {
-	if (error) return rgb_image_create_error();
-	if (rgb_image_is_error(image)) return rgb_image_error_img(error, "image is invalid");
-	RGB_Image copy = rgb_image_create(width, height, error);
-	rgb_image_copy_from_to(rgb_image_create_view(image, x, y, width, height, error), copy, error);
-	return copy;
-}
-
-RGB_Image rgb_image_create_view(RGB_Image &image, unsigned int x, unsigned int y, unsigned int width, unsigned int height, bool &error) {
-	if (error) return rgb_image_create_error();
-	if (rgb_image_is_error(image)) return rgb_image_error_img(error, "image is invalid");
-	return RGB_Image(image.getData(x, y), width, height, image.stride, false);
-}
-
-RGB_Image rgb_image_load(std::string filename, bool &error) {
-	if (error) return rgb_image_create_error();
+RGB_Image RGB_Image::load(std::string filename, bool &error) {
+	if (error) return create_error();
 	int width, height, file_components;
 	unsigned char *data = stbi_load(filename.c_str(), &width, &height, &file_components, 3);
-	if (!data) return rgb_image_error_img(error, std::string("failed to load image: ") + std::string(stbi_failure_reason()));
+	if (!data) return report_error_img(error, std::string("failed to load image: ") + std::string(stbi_failure_reason()));
 	return RGB_Image(data, width, height, width * 3, true);
 }
 
-RGB_Image rgb_image_load(std::string filename, unsigned int expected_width, unsigned int expected_height, bool &error) {
-	if (error) return rgb_image_create_error();
-	RGB_Image image = rgb_image_load(filename, error);
+RGB_Image RGB_Image::load(std::string filename, unsigned int expected_width, unsigned int expected_height, bool &error) {
+	if (error) return create_error();
+	RGB_Image image = load(filename, error);
 	if (error) return image;
 	if (image.width == expected_width && image.height == expected_height) return image;
 	std::ostringstream error_text;
 	error_text << "expected dimensions [" << expected_width << ", " << expected_height << "] ";
 	error_text << "but found [" << image.width << ", " << image.height << "]";
-	return rgb_image_error_img(error, error_text.str());
+	return report_error_img(error, error_text.str());
 }
 
-void rgb_image_save(std::string filename, RGB_Image &image, bool &error) {
+void RGB_Image::save(std::string filename, bool &error) {
 	if (error) return;
-	if (rgb_image_is_error(image)) return rgb_image_error_void(error, "image is invalid");
-	bool success = stbi_write_png(filename.c_str(), image.width, image.height, 3, image.data, image.stride);
-	if (!success) rgb_image_error_void(error, "failed to save image");
+	if (is_error()) return report_error_void(error, "image is invalid");
+	bool success = stbi_write_png(filename.c_str(), width, height, 3, data, stride);
+	if (!success) report_error_void(error, "failed to save image");
 }
 
-void rgb_image_tint(RGB_Image &image, RGB_Image_Color color, bool &error) {
+RGB_Image RGB_Image::create_copy(bool &error) {
+	if (error) return create_error();
+	if (is_error()) return report_error_img(error, "image is invalid");
+	RGB_Image copy = create(width, height, error);
+	copy_to(copy, error);
+	return copy;
+}
+
+RGB_Image RGB_Image::create_copy(unsigned int x, unsigned int y, unsigned int width, unsigned int height, bool &error) {
+	if (error) return create_error();
+	if (is_error()) return report_error_img(error, "image is invalid");
+	RGB_Image copy = create(width, height, error);
+	create_view(x, y, width, height, error).copy_to(copy, error);
+	return copy;
+}
+
+RGB_Image RGB_Image::create_view(unsigned int x, unsigned int y, unsigned int width, unsigned int height, bool &error) {
+	if (error) return create_error();
+	if (is_error()) return report_error_img(error, "image is invalid");
+	return RGB_Image(getData(x, y), width, height, stride, false);
+}
+
+void RGB_Image::tint(RGB_Image_Color color, bool &error) {
 	if (error) return;
-	if (rgb_image_is_error(image)) return rgb_image_error_void(error, "image is invalid");
+	if (is_error()) return report_error_void(error, "image is invalid");
 	unsigned char alpha_byte = color >> 24;
 	float alpha = alpha_byte / 255.0f;
-	for (unsigned int y = 0; y < image.height; ++y) {
-		for (unsigned int x = 0; x < image.width; ++x) {
-			unsigned char *pixel = image.getData(x, y);
+	for (unsigned int y = 0; y < height; ++y) {
+		for (unsigned int x = 0; x < width; ++x) {
+			unsigned char *pixel = getData(x, y);
 			for (unsigned int i = 0; i < 3; ++i) {
 				unsigned char pixel_byte = pixel[i];
 				unsigned char color_byte = color >> ((2 - i) * 8);
@@ -147,42 +155,34 @@ void rgb_image_tint(RGB_Image &image, RGB_Image_Color color, bool &error) {
 	}
 }
 
-bool rgb_image_compare(RGB_Image &one, RGB_Image &two, bool &error) {
+bool RGB_Image::equals(RGB_Image &other, bool &error) {
 	if (error) return false;
-	if (rgb_image_is_error(one)) return rgb_image_error_bool(error, "first image is invalid");
-	if (rgb_image_is_error(two)) return rgb_image_error_bool(error, "second image is invalid");
-	if (one.width != two.width || one.height != two.height) {
+	if (this->is_error()) return report_error_bool(error, "this image is invalid");
+	if (other.is_error()) return report_error_bool(error, "other image is invalid");
+	if (this->width != other.width || this->height != other.height) {
 		std::ostringstream error_text;
 		error_text << "different image dimensions (";
-		error_text << "first: [" << one.width << ", " << one.height << "]; ";
-		error_text << "second: [" << two.width << ", " << two.height << "])";
-		return rgb_image_error_bool(error, error_text.str());
+		error_text << "this: [" << this->width << ", " << this->height << "]; ";
+		error_text << "other: [" << other.width << ", " << other.height << "])";
+		return report_error_bool(error, error_text.str());
 	}
-	for (unsigned int y = 0; y < one.height; ++y)
-		if (memcmp(one.getData(0, y), two.getData(0, y), one.width * 3) != 0)
+	for (unsigned int y = 0; y < this->height; ++y)
+		if (memcmp(this->getData(0, y), other.getData(0, y), this->width * 3) != 0)
 			return false;
 	return true;
 }
 
-void rgb_image_copy_from_to(RGB_Image &source, RGB_Image &destination, bool &error) {
+void RGB_Image::copy_to(RGB_Image &destination, bool &error) {
 	if (error) return;
-	if (rgb_image_is_error(source)) return rgb_image_error_void(error, "source image is invalid");
-	if (rgb_image_is_error(destination)) return rgb_image_error_void(error, "destination image is invalid");
-	if (source.width != destination.width || source.height != destination.height) {
+	if (this->is_error()) return report_error_void(error, "source image is invalid");
+	if (destination.is_error()) return report_error_void(error, "destination image is invalid");
+	if (this->width != destination.width || this->height != destination.height) {
 		std::ostringstream error_text;
 		error_text << "different image dimensions (";
-		error_text << "source: [" << source.width << ", " << source.height << "]; ";
+		error_text << "source: [" << this->width << ", " << this->height << "]; ";
 		error_text << "destination: [" << destination.width << ", " << destination.height << "])";
-		return rgb_image_error_void(error, error_text.str());
+		return report_error_void(error, error_text.str());
 	}
-	for (unsigned int y = 0; y < source.height; ++y)
-		std::memcpy(destination.getData(0, y), source.getData(0, y), source.width * 3);
-}
-
-inline bool rgb_image_is_error(RGB_Image &image) {
-	return image.data == nullptr;
-}
-
-std::string rgb_image_error_text() {
-	return rgb_image_error;
+	for (unsigned int y = 0; y < this->height; ++y)
+		std::memcpy(destination.getData(0, y), this->getData(0, y), this->width * 3);
 }

@@ -40,8 +40,8 @@ void prepare_files(std::vector<fs::path> &files) {
 }
 
 RGB_Image create_buffer(bool &error) {
-	RGB_Image buffer = rgb_image_create(raw_base_width, raw_base_height, error);
-	if (error) std::cout << "Error: " << rgb_image_error_text() << "." << std::endl;
+	RGB_Image buffer = RGB_Image::create(raw_base_width, raw_base_height, error);
+	if (error) std::cout << "Error: " << RGB_Image::get_error_text() << "." << std::endl;
 	return buffer;
 }
 
@@ -56,7 +56,7 @@ RGB_Image **load_digits(bool &error) {
 	for (int i = 0; i < 10; ++i) {
 		std::ostringstream filename;
 		filename << "data/reference/digit_" << i << ".png";
-		digits[i] = new RGB_Image(rgb_image_load(filename.str(), digit_width, digit_height, error));
+		digits[i] = new RGB_Image(RGB_Image::load(filename.str(), digit_width, digit_height, error));
 	}
 	return digits;
 }
@@ -72,9 +72,9 @@ void process_files(RGB_Image &buffer, RGB_Image **digits, std::vector<fs::path> 
 
 int process_file(RGB_Image &buffer, RGB_Image **digits, fs::path file) {
 	bool error = false;
-	RGB_Image raw = rgb_image_load(file.string(), error);
+	RGB_Image raw = RGB_Image::load(file.string(), error);
 	if (error) {
-		std::cout << "failed to load: " << rgb_image_error_text() << ": skipped" << std::endl;
+		std::cout << "failed to load: " << RGB_Image::get_error_text() << ": skipped" << std::endl;
 		return 0;
 	}
 	if (raw.getWidth() < raw_base_width || raw.getHeight() < raw_base_height) {
@@ -106,9 +106,9 @@ int process_file(RGB_Image &buffer, RGB_Image **digits, fs::path file) {
 	std::cout << "Level " << std::setfill('0') << std::setw(3) << level << ": ";
 	std::ostringstream filename;
 	filename << "data/levels/level_" << std::setfill('0') << std::setw(3) << level << ".png";
-	RGB_Image area = rgb_image_create_view(buffer, area_x, area_y, area_width, area_height, error);
-	rgb_image_save(filename.str(), area, error);
-	std::cout << (error ? rgb_image_error_text() : "success") << std::endl;
+	RGB_Image area = buffer.create_view(area_x, area_y, area_width, area_height, error);
+	area.save(filename.str(), error);
+	std::cout << (error ? RGB_Image::get_error_text() : "success") << std::endl;
 	return error ? 0 : level;
 }
 
@@ -121,10 +121,10 @@ int find_level_number(RGB_Image **digits, RGB_Image &raw) {
 		for (; digit_index < 10; ++digit_index) {
 			int raw_digit_x = level_number_x + digit_offset * digit_width;
 			int raw_digit_y = level_number_y;
-			RGB_Image raw_digit = rgb_image_create_view(raw, raw_digit_x, raw_digit_y, digit_width, digit_height, error);
+			RGB_Image raw_digit = raw.create_view(raw_digit_x, raw_digit_y, digit_width, digit_height, error);
 			RGB_Image *test_digit = digits[digit_index];
-			if (rgb_image_compare(raw_digit, *test_digit, error)) break;
-			if (error) { std::cout << rgb_image_error_text() << ": "; return 0; }
+			if (raw_digit.equals(*test_digit, error)) break;
+			if (error) { std::cout << RGB_Image::get_error_text() << ": "; return 0; }
 		}
 		if (digit_index == 10) return level;
 		level = 10 * level + digit_index;

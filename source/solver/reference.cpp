@@ -33,7 +33,7 @@ RGB_Image **load_reference_images(bool &error) {
 	for (int i = 0; i < number_of_references; ++i) {
 		std::ostringstream filename;
 		filename << "data/reference/tile_" << reference_names[i] << ".png";
-		reference_images[i] = new RGB_Image(rgb_image_load(filename.str(), tile_size, tile_size, error));
+		reference_images[i] = new RGB_Image(RGB_Image::load(filename.str(), tile_size, tile_size, error));
 	}
 	return reference_images;
 }

@@ -42,13 +42,13 @@ Configuration *load_level(std::string filename, RGB_Image **reference_images, bo
 		error = true;
 		return nullptr;
 	}
-	RGB_Image img = rgb_image_load(filename, level_pixel_width, level_pixel_height, error);
+	RGB_Image img = RGB_Image::load(filename, level_pixel_width, level_pixel_height, error);
 	for (int y = 0; !error && y < level_tile_height; ++y) {
 		for (int x = 0; !error && x < level_tile_width; ++x) {
-			RGB_Image level_tile = rgb_image_create_view(img, x * tile_size, y * tile_size, tile_size, tile_size, error);
+			RGB_Image level_tile = img.create_view(x * tile_size, y * tile_size, tile_size, tile_size, error);
 			int reference_index = 0;
 			for (; reference_index < number_of_references; ++reference_index)
-				if (rgb_image_compare(level_tile, *reference_images[reference_index], error))
+				if (level_tile.equals(*reference_images[reference_index], error))
 					break;
 			if (reference_index < number_of_references) {
 				config->board[board_position(x, y)] = reference_tiles[reference_index];
@@ -59,7 +59,7 @@ Configuration *load_level(std::string filename, RGB_Image **reference_images, bo
 		}
 	}
 	if (error) {
-		std::cout << "Error: " << rgb_image_error_text() << std::endl;
+		std::cout << "Error: " << RGB_Image::get_error_text() << std::endl;
 	}
 	return config;
 }
@@ -97,8 +97,8 @@ void solve_level(int level_number, bool unsolved, Logger &logger, RGB_Image **re
 		if (!list.empty()) {
 			bool error = false;
 			RGB_Image image = Solution_Painter(*level, list.get_solutions(), reference_images).paint(error);
-			rgb_image_save(solution_name, image, error);
-			std::cout << (error ? rgb_image_error_text() : "success") << ": " << std::flush;
+			image.save(solution_name, error);
+			std::cout << (error ? RGB_Image::get_error_text() : "success") << ": " << std::flush;
 		}
 	}
 	free_level(level);
