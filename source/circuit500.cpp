@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <iterator>
 #include <stdexcept>
@@ -20,10 +21,8 @@ namespace fs = boost::filesystem;
 namespace icl = boost::icl;
 namespace opt = boost::program_options;
 
-bool create_directory_if_not_exists(fs::path path) {
-	if (fs::is_directory(path)) return true;
-	return fs::create_directory(path);
-}
+bool create_directory_if_not_exists(fs::path path);
+void prepare_files(std::vector<fs::path> &files);
 
 int main(int argument_count, char **argument_values) {
 	try {
@@ -153,5 +152,22 @@ int main(int argument_count, char **argument_values) {
 	} catch(std::exception& e) {
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
+	}
+}
+
+bool create_directory_if_not_exists(fs::path path) {
+	if (fs::is_directory(path)) return true;
+	return fs::create_directory(path);
+}
+
+void prepare_files(std::vector<fs::path> &files) {
+	Preparer preparer;
+	if (!preparer.is_initialized()) return;
+
+	int count = 0, total = files.size();
+	for (auto&& it : files) {
+		int progress = 100 * (++count) / total;
+		std::cout << std::setfill(' ') << std::setw(3) << progress << "%: " << it.generic_string() << ": ";
+		preparer.prepare(it);
 	}
 }
