@@ -51,7 +51,7 @@ Configuration *load_level(std::string filename, RGB_Image **reference_images, bo
 				if (level_tile.equals(*reference_images[reference_index], error))
 					break;
 			if (reference_index < number_of_references) {
-				config->board[board_position(x, y)] = reference_tiles[reference_index];
+				config->board[Board_Position(x, y)] = reference_tiles[reference_index];
 			} else {
 				std::cout << "Unknown tile found." << std::endl;
 				error = true;

@@ -28,29 +28,29 @@ void update_board_state(const Board &board, Board_State &state) {
 	while (!open.empty()) {
 		Board_Position current = open.pop();
 		if (is_end(board[current])) state.solved = true;
-		if (has_up(current)) {
-			Board_Position up = get_up(current);
+		if (current.has_up()) {
+			Board_Position up = current.get_up();
 			if (!state.filled[up] && connects_up(board[current], board[up])) {
 				state.filled[up] = true;
 				open.push(up);
 			}
 		}
-		if (has_right(current)) {
-			Board_Position right = get_right(current);
+		if (current.has_right()) {
+			Board_Position right = current.get_right();
 			if (!state.filled[right] && connects_right(board[current], board[right])) {
 				state.filled[right] = true;
 				open.push(right);
 			}
 		}
-		if (has_down(current)) {
-			Board_Position down = get_down(current);
+		if (current.has_down()) {
+			Board_Position down = current.get_down();
 			if (!state.filled[down] && connects_down(board[current], board[down])) {
 				state.filled[down] = true;
 				open.push(down);
 			}
 		}
-		if (has_left(current)) {
-			Board_Position left = get_left(current);
+		if (current.has_left()) {
+			Board_Position left = current.get_left();
 			if (!state.filled[left] && connects_left(board[current], board[left])) {
 				state.filled[left] = true;
 				open.push(left);

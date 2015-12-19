@@ -8,22 +8,74 @@ const int board_size = level_tile_width * level_tile_height;
 
 typedef Tile Board[board_size];
 
-typedef uint8_t Board_Position;
+class Board_Position {
+public:
 
-inline Board_Position board_position(int tile_x, int tile_y) { return tile_y * level_tile_width + tile_x; }
+	Board_Position()
+		: index(0) {}
 
-inline int get_x(Board_Position position) { return position % level_tile_width; }
-inline int get_y(Board_Position position) {	return position / level_tile_width; }
+	Board_Position(uint8_t index)
+		: index(index) {}
 
-inline bool has_up(Board_Position position) { return get_y(position) > 0; }
-inline bool has_right(Board_Position position) { return get_x(position) < level_tile_width - 1; }
-inline bool has_down(Board_Position position) { return get_y(position) < level_tile_height - 1; }
-inline bool has_left(Board_Position position) { return get_x(position) > 0; }
+	Board_Position(int tile_x, int tile_y)
+		: index(tile_y * level_tile_width + tile_x)	{}
 
-inline Board_Position get_up(Board_Position position) { return board_position(get_x(position), get_y(position)-1); }
-inline Board_Position get_right(Board_Position position) { return board_position(get_x(position)+1, get_y(position)); }
-inline Board_Position get_down(Board_Position position) { return board_position(get_x(position), get_y(position)+1); }
-inline Board_Position get_left(Board_Position position) { return board_position(get_x(position)-1, get_y(position)); }
+	int get_tile_x() const {
+		// return index % level_tile_width;
+		// must be power of two
+		return index & (level_tile_width - 1);
+	}
+
+	int get_tile_y() const {
+		return index / level_tile_width;
+	}
+
+	bool has_up() const {
+		// return get_tile_y() > 0;
+		return index >= level_tile_width;
+	}
+
+	bool has_right() const {
+		return get_tile_x() < level_tile_width - 1;
+	}
+
+	bool has_down() const {
+		// return get_tile_y() < level_tile_height - 1;
+		return index < (level_tile_height - 1) * level_tile_width;
+	}
+
+	bool has_left() const {
+		return get_tile_x() > 0;
+	}
+
+	Board_Position get_up() const {
+		return Board_Position(index - level_tile_width);
+	}
+
+	Board_Position get_right() const {
+		return Board_Position(index + 1);
+	}
+
+	Board_Position get_down() const {
+		return Board_Position(index + level_tile_width);
+	}
+
+	Board_Position get_left() const {
+		return Board_Position(index - 1);
+	}
+
+	Board_Position& operator ++() {
+		++index;
+		return *this;
+	}
+
+	operator uint8_t() const {
+		return index;
+	}
+
+private:
+	uint8_t index;
+};
 
 bool boards_are_equal(const Board &one, const Board &two);
 

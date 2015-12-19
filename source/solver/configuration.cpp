@@ -13,20 +13,20 @@ Configuration with_move(Configuration config, Board_Position tap_position, Board
 
 Configuration with_tap(Configuration config, Board_Position tap, bool &failed) {
 	config.taps[config.tap_count++] = tap;
-	if (has_up(tap)) {
-		Board_Position up = get_up(tap);
+	if (tap.has_up()) {
+		Board_Position up = tap.get_up();
 		if (is_gap(config.board[up])) return with_move(config, tap, up);
 	}
-	if (has_right(tap)) {
-		Board_Position right = get_right(tap);
+	if (tap.has_right()) {
+		Board_Position right = tap.get_right();
 		if (is_gap(config.board[right])) return with_move(config, tap, right);
 	}
-	if (has_down(tap)) {
-		Board_Position down = get_down(tap);
+	if (tap.has_down()) {
+		Board_Position down = tap.get_down();
 		if (is_gap(config.board[down])) return with_move(config, tap, down);
 	}
-	if (has_left(tap)) {
-		Board_Position left = get_left(tap);
+	if (tap.has_left()) {
+		Board_Position left = tap.get_left();
 		if (is_gap(config.board[left])) return with_move(config, tap, left);
 	}
 	if (can_rotate(config.board[tap]) && get_rotations(config.board[tap]) < 3) {

@@ -58,7 +58,7 @@ void Solution_Painter::paint_solution(RGB_Image &destination, Configuration leve
 	for (; position < solution.tap_count; ++position) {
 		RGB_Image board_view = paint_board_at_offset(destination, level.board, state, position);
 		Board_Position tap = solution.taps[position];
-		int x = get_x(tap) * tile_size, y = get_y(tap) * tile_size;
+		int x = tap.get_tile_x() * tile_size, y = tap.get_tile_y() * tile_size;
 		RGB_Image tap_view = board_view.create_view(x, y, tile_size, tile_size, *error);
 		tap_view.tint(0x80ff0000, *error);
 		level = with_tap(level, tap);
@@ -78,7 +78,7 @@ RGB_Image Solution_Painter::paint_board_at_offset(RGB_Image &destination, Board 
 void Solution_Painter::paint_board(RGB_Image &destination, Board &board, Board_State &state) {
 	for (int y = 0; y < level_tile_height; ++y) {
 		for (int x = 0; x < level_tile_width; ++x) {
-			Board_Position position = board_position(x, y);
+			Board_Position position(x, y);
 			RGB_Image tile_view = destination.create_view(x * tile_size, y * tile_size, tile_size, tile_size, *error);
 			RGB_Image &ref_img = *reference_images[get_reference_index(board[position], state.filled[position])];
 			ref_img.copy_to(tile_view, *error);
