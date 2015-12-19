@@ -1,3 +1,2 @@
 - class refactoring
-- handle option
 - multithreading

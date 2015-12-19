@@ -96,7 +96,7 @@ int Preparer::prepare(fs::path file) {
 		std::cout << "failed to detect level number" << std::endl;
 		return 0;
 	}
-	std::cout << "Level " << std::setfill('0') << std::setw(3) << level << ": ";
+	std::cout << "level " << std::setfill(' ') << std::setw(3) << level << ": ";
 	std::ostringstream filename;
 	filename << "data/levels/level_" << std::setfill('0') << std::setw(3) << level << ".png";
 	RGB_Image area = buffer.create_view(area_x, area_y, area_width, area_height, prepare_error);

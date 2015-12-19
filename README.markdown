@@ -60,6 +60,8 @@ Options:
  --prepare-all              | -P           | Prepares all files in 'data/raw/'.
  --solve _X **or** X‑Y_ ... | -s           | Solves the specified levels. X and Y are level numbers between 1 and 500. Examples: 42, 1-100, etc.
  --solve-all                | -S           | Solves all levels.
+ --handle _filename_ ...    | -h           | Prepares the specified files and solves the levels they contain.
+ --handle-all               | -H           | Handles all files in 'data/raw/'.
 
 Dependencies
 ============

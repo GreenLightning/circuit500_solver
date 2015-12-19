@@ -21,8 +21,12 @@ namespace fs = boost::filesystem;
 namespace icl = boost::icl;
 namespace opt = boost::program_options;
 
+void check_conflicting_options(opt::variables_map &variables, std::string master, std::string slave);
 bool create_directory_if_not_exists(fs::path path);
-void prepare_files(std::vector<fs::path> &files);
+void prepare_and_handle_files(
+	std::vector<fs::path> &files_to_prepare,
+	std::vector<fs::path> &files_to_handle,
+	icl::interval_set<int> &levels_to_solve);
 
 int main(int argument_count, char **argument_values) {
 	try {
@@ -46,27 +50,39 @@ int main(int argument_count, char **argument_values) {
 
 		description.add_options()
 			("help",
-				"Prints this help message.")
+				"Prints this help message.\n")
+
 			("log,l",
-				"Logs statistics about the solving phase into a log file inside 'data/logs/'.")
+				"Logs statistics about the solving phase into a log file inside 'data/logs/'.\n")
+
 			("unsolved,u",
-				"Solves only those levels for which it cannot already find a solution inside\n"
-				"'data/solutions/'.")
+				"Solves only those levels for which it cannot already find a solution inside "
+				"'data/solutions/'.\n")
+
 			("prepare,p", opt::value<std::vector<std::string>>()->multitoken(),
 				"Prepares the specified files.\n"
 				"Must be followed by one or more filenames.\n"
-				"Filenames must not include 'data/raw/'.")
+				"Filenames must not include 'data/raw/'.\n")
+
 			("prepare-all,P",
-				"Prepares all files in 'data/raw/'.")
+				"Prepares all files in 'data/raw/'.\n")
+
 			("solve,s", opt::value<std::vector<std::string>>()->multitoken(),
 				"Solves the specified levels.\n"
 				"Must be followed by one or more level descriptions in the form of:\n"
-				" X:   \twhere X is a level number between 1 and 500."
-					"Solves the specified level.\n"
-				" X-Y: \twhere X and Y are level numbers between 1 and 500 and X is less than or equal to Y."
-					"Solves all levels between X and Y (both inclusive).")
+				" X:   \twhere X is a level number between 1 and 500. "
+				"Solves the specified level.\n"
+				" X-Y: \twhere X and Y are level numbers between 1 and 500 and X is less than or "
+				"equal to Y. Solves all levels between X and Y (both inclusive).\n")
+
 			("solve-all,S",
-				"Solves all levels.")
+				"Solves all levels.\n")
+
+			("handle,h", opt::value<std::vector<std::string>>()->multitoken(),
+				"Prepares the specified files and solves the levels they contain.\n")
+
+			("handle-all,H",
+				"Handles all files in 'data/raw/'.\n")
 		;
 
 		opt::options_description helper_description;
@@ -87,10 +103,9 @@ int main(int argument_count, char **argument_values) {
 
 		if (variables.count("__unrecognized__"))
 			throw std::runtime_error("unexpected argument: '" + variables["__unrecognized__"].as<std::vector<std::string>>()[0] + "'");
-		if (variables.count("prepare-all") && variables.count("prepare"))
-			throw std::runtime_error("prepare is not allowed if prepare-all is used");
-		if (variables.count("solve-all") && variables.count("solve"))
-			throw std::runtime_error("solve is not allowed if solve-all is used");
+		check_conflicting_options(variables, "handle-all", "handle");
+		check_conflicting_options(variables, "solve-all", "solve");
+		check_conflicting_options(variables, "prepare-all", "prepare");
 
 		if (variables.count("help")) {
 			std::cout << description << std::endl;
@@ -115,6 +130,7 @@ int main(int argument_count, char **argument_values) {
 		create_directory_if_not_exists("data/logs/");
 
 		std::vector<fs::path> files_to_prepare;
+		std::vector<fs::path> files_to_handle;
 		icl::interval_set<int> levels_to_solve;
 
 		if (variables.count("prepare-all")) {
@@ -128,6 +144,19 @@ int main(int argument_count, char **argument_values) {
 			for (auto &&entry : input_list) {
 				files_to_prepare.push_back(dir / entry);
 			}
+		}
+
+		if (variables.count("handle-all")) {
+			for (auto &&entry : fs::directory_iterator("data/raw/")) {
+				files_to_handle.push_back(entry.path());
+			}
+		}
+		if (variables.count("handle")) {
+			fs::path dir = "data/raw";
+			std::vector<std::string> input_list = variables["handle"].as<std::vector<std::string>>();
+			for (auto &&entry : input_list) {
+				files_to_handle.push_back(dir / entry);
+			}	
 		}
 		
 		if (variables.count("solve-all")) {
@@ -143,7 +172,7 @@ int main(int argument_count, char **argument_values) {
 			throw std::runtime_error("out of memory: failed to create logger");
 		}
 
-		prepare_files(files_to_prepare);
+		prepare_and_handle_files(files_to_prepare, files_to_handle, levels_to_solve);
 		solve_levels(levels_to_solve, variables.count("unsolved"), *logger);
 
 		delete logger;
@@ -155,19 +184,36 @@ int main(int argument_count, char **argument_values) {
 	}
 }
 
+void check_conflicting_options(opt::variables_map &variables, std::string master, std::string slave) {
+	if (variables.count(master) && variables.count(slave))
+			throw std::runtime_error(slave + " is not allowed if " + master + " is used");
+}
+
 bool create_directory_if_not_exists(fs::path path) {
 	if (fs::is_directory(path)) return true;
 	return fs::create_directory(path);
 }
 
-void prepare_files(std::vector<fs::path> &files) {
+void prepare_and_handle_files(
+	std::vector<fs::path> &files_to_prepare,
+	std::vector<fs::path> &files_to_handle,
+	icl::interval_set<int> &levels_to_solve) {
+
 	Preparer preparer;
 	if (!preparer.is_initialized()) return;
 
-	int count = 0, total = files.size();
-	for (auto&& it : files) {
+	int count = 0, total = files_to_prepare.size() + files_to_handle.size();
+
+	for (auto&& it : files_to_prepare) {
 		int progress = 100 * (++count) / total;
 		std::cout << std::setfill(' ') << std::setw(3) << progress << "%: " << it.generic_string() << ": ";
 		preparer.prepare(it);
+	}
+
+	for (auto&& it : files_to_handle) {
+		int progress = 100 * (++count) / total;
+		std::cout << std::setfill(' ') << std::setw(3) << progress << "%: " << it.generic_string() << ": ";
+		int level_number = preparer.prepare(it);
+		if (level_number != 0) levels_to_solve.insert(level_number);
 	}
 }
