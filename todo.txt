@@ -1,4 +1,3 @@
 - class refactoring
-- dry run option
 - search space options
 - multithreading

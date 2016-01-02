@@ -23,6 +23,7 @@ private:
 
 public:
 	bool unsolved;
+	bool dry;
 
 private:
 	Logger &logger;

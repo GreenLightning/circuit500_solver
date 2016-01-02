@@ -28,7 +28,7 @@ void prepare_and_handle_files(
 	icl::interval_set<int> &levels_to_solve);
 void solve_levels(
 	icl::interval_set<int> &levels_to_solve,
-	bool unsolved,
+	opt::variables_map &variables,
 	Logger &logger);
 
 int main(int argument_count, char **argument_values) {
@@ -57,6 +57,9 @@ int main(int argument_count, char **argument_values) {
 
 			("log,l",
 				"Logs statistics about the solving phase into a log file inside 'data/logs/'.\n")
+
+			("dry,d",
+				"Does not save solutions during the solving phase.\n")
 
 			("unsolved,u",
 				"Solves only those levels for which it cannot already find a solution inside "
@@ -176,7 +179,7 @@ int main(int argument_count, char **argument_values) {
 		}
 
 		prepare_and_handle_files(files_to_prepare, files_to_handle, levels_to_solve);
-		solve_levels(levels_to_solve, variables.count("unsolved"), *logger);
+		solve_levels(levels_to_solve, variables, *logger);
 
 		delete logger;
 
@@ -221,9 +224,10 @@ void prepare_and_handle_files(
 	}
 }
 
-void solve_levels(icl::interval_set<int> &level_set, bool unsolved, Logger &logger) {
+void solve_levels(icl::interval_set<int> &level_set, opt::variables_map &variables, Logger &logger) {
 	Solver solver(logger);
-	solver.unsolved = unsolved;
+	solver.unsolved = variables.count("unsolved");
+	solver.dry = variables.count("dry");
 	for(icl::interval_set<int>::element_iterator level_it = elements_begin(level_set);
 		level_it != elements_end(level_set);
 		++level_it)

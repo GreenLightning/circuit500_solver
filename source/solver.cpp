@@ -23,7 +23,7 @@
 
 namespace fs = boost::filesystem;
 
-Solver::Solver(Logger &logger) : logger(logger), unsolved(false) {
+Solver::Solver(Logger &logger) : logger(logger), unsolved(false), dry(false) {
 	bool error = false;
 	reference_images = load_reference_images(error);
 	if (error)
@@ -49,8 +49,10 @@ void Solver::solve_level(int level_number) {
 		logger.stop_search(list.get_tap_count(), list.get_action_count());
 		if (!list.empty()) {
 			bool error = false;
-			RGB_Image image = Solution_Painter(*level, list.get_solutions(), reference_images).paint(error);
-			image.save(solution_name, error);
+			if (!dry) {
+				RGB_Image image = Solution_Painter(*level, list.get_solutions(), reference_images).paint(error);
+				image.save(solution_name, error);
+			}
 			std::cout << (error ? RGB_Image::get_error_text() : "success") << ": " << std::flush;
 		} else {
 			std::cout << "failure: " << std::flush;
