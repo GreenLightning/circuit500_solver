@@ -1,3 +1,2 @@
 - class refactoring
-- search space options
 - multithreading

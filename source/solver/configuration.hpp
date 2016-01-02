@@ -6,7 +6,7 @@
 #include "board.hpp"
 #include "tile.hpp"
 
-const int maximum_number_of_taps = 6;
+const int maximum_number_of_taps = 16;
 
 struct Configuration {
 	Board board;

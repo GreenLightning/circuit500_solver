@@ -1,14 +1,15 @@
 #include "logger.hpp"
 #include "rgb_image.hpp"
-#include "solver/board.hpp"
 #include "solver/configuration.hpp"
-#include "solver/solution_list.hpp"
 
 class Solver {
 public:
-	Solver(Logger &logger);
+	static int tap_maximum();
+
+	Solver(Logger &logger, int min_taps, int max_taps);
 	~Solver();
 
+	void set_tap_range(int a, int b);
 	void solve_level(int level_number);
 
 private:
@@ -18,12 +19,13 @@ private:
 	std::string level_filename(int level_number);
 	std::string solution_filename(int level_number);
 
-	Solution_List find_solution_list(Configuration level, long long int &solutions_checked);
-	void find_solution_helper(Solution_List &list, Board_State &state, long long int &solutions_checked, const Configuration &solution);
-
 public:
 	bool unsolved;
 	bool dry;
+
+private:
+	int min_taps;
+	int max_taps;
 
 private:
 	Logger &logger;

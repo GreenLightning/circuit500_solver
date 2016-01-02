@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
@@ -15,6 +16,7 @@
 #include "solver/board.hpp"
 #include "solver/configuration.hpp"
 #include "solver/reference.hpp"
+#include "solver/solution_finder.hpp"
 #include "solver/solution_list.hpp"
 #include "solver/solution_painter.hpp"
 #include "solver/tile.hpp"
@@ -23,7 +25,12 @@
 
 namespace fs = boost::filesystem;
 
-Solver::Solver(Logger &logger) : logger(logger), unsolved(false), dry(false) {
+int Solver::tap_maximum() {
+	return maximum_number_of_taps;
+}
+
+Solver::Solver(Logger &logger, int min_taps, int max_taps) :
+	logger(logger), unsolved(false), dry(false), min_taps(min_taps), max_taps(max_taps) {
 	bool error = false;
 	reference_images = load_reference_images(error);
 	if (error)
@@ -32,6 +39,13 @@ Solver::Solver(Logger &logger) : logger(logger), unsolved(false), dry(false) {
 
 Solver::~Solver() {
 	free_reference_images(reference_images);
+}
+
+void Solver::set_tap_range(int a, int b) {
+	int min = std::min(a, b);
+	int max = std::max(a, b);
+	min_taps = std::max(min, 1);
+	max_taps = std::min(max, maximum_number_of_taps);
 }
 
 void Solver::solve_level(int level_number) {
@@ -45,7 +59,10 @@ void Solver::solve_level(int level_number) {
 	Configuration *level = load_level(level_filename(level_number), level_error);
 	if (!level_error) {
 		long long int & solutions_checked = logger.start_search(level_number);
-		Solution_List list = find_solution_list(*level, solutions_checked);
+		Solution_Finder finder(min_taps, max_taps);
+		finder.find(*level);
+		Solution_List list = finder.get_solution_list();
+		solutions_checked += finder.get_solutions_checked();
 		logger.stop_search(list.get_tap_count(), list.get_action_count());
 		if (!list.empty()) {
 			bool error = false;
@@ -106,25 +123,4 @@ std::string Solver::solution_filename(int level_number) {
 	std::ostringstream filename;
 	filename << "data/solutions/solution_" << std::setfill('0') << std::setw(3) << level_number << ".png";
 	return filename.str();
-}
-
-Solution_List Solver::find_solution_list(Configuration level, long long int &solutions_checked) {
-	Solution_List list;
-	Board_State state;
-	find_solution_helper(list, state, solutions_checked, level);
-	return list;
-}
-
-void Solver::find_solution_helper(Solution_List &list, Board_State &state, long long int &solutions_checked, const Configuration &solution) {
-	++solutions_checked;
-	update_board_state(solution.board, state);
-	if (state.solved) {
-		list.append(solution);
-	} else if (solution.tap_count < maximum_number_of_taps) {
-		for (Board_Position position = 0; position < board_size; ++position) {
-			bool failed = false;
-			Configuration next = with_tap(solution, position, failed);
-			if (!failed) find_solution_helper(list, state, solutions_checked, next);
-		}
-	}
 }

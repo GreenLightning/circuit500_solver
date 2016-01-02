@@ -4,6 +4,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <boost/filesystem.hpp>
@@ -21,6 +22,7 @@ namespace icl = boost::icl;
 namespace opt = boost::program_options;
 
 void check_conflicting_options(opt::variables_map &variables, std::string master, std::string slave);
+std::pair<int,int> parse_range(std::string text);
 bool create_directory_if_not_exists(fs::path path);
 void prepare_and_handle_files(
 	std::vector<fs::path> &files_to_prepare,
@@ -29,6 +31,7 @@ void prepare_and_handle_files(
 void solve_levels(
 	icl::interval_set<int> &levels_to_solve,
 	opt::variables_map &variables,
+	std::pair<int,int> range,
 	Logger &logger);
 
 int main(int argument_count, char **argument_values) {
@@ -64,6 +67,11 @@ int main(int argument_count, char **argument_values) {
 			("unsolved,u",
 				"Solves only those levels for which it cannot already find a solution inside "
 				"'data/solutions/'.\n")
+
+			("range,r", opt::value<std::string>()->default_value("1-3"),
+				("Specifies the range of taps to check for solutions.\n"
+				"Must be either N or N-M.\n"
+				"N and M must be between 1 and " + std::to_string(Solver::tap_maximum()) + " (both inclusive).\n").c_str())
 
 			("prepare,p", opt::value<std::vector<std::string>>()->multitoken(),
 				"Prepares the specified files.\n"
@@ -173,13 +181,15 @@ int main(int argument_count, char **argument_values) {
 			levels_to_solve += Level_Set_Parser(input_list).parse();
 		}
 
+		std::pair<int,int> range = parse_range(variables["range"].as<std::string>());
+
 		Logger *logger = variables.count("log") ? Logger::create_file_logger() : Logger::create_fake_logger();
 		if (!logger) {
 			throw std::runtime_error("out of memory: failed to create logger");
 		}
 
 		prepare_and_handle_files(files_to_prepare, files_to_handle, levels_to_solve);
-		solve_levels(levels_to_solve, variables, *logger);
+		solve_levels(levels_to_solve, variables, range, *logger);
 
 		delete logger;
 
@@ -193,6 +203,23 @@ int main(int argument_count, char **argument_values) {
 void check_conflicting_options(opt::variables_map &variables, std::string master, std::string slave) {
 	if (variables.count(master) && variables.count(slave))
 			throw std::runtime_error(slave + " is not allowed if " + master + " is used");
+}
+
+std::pair<int,int> parse_range(std::string text) {
+	boost::regex regex("(\\d{1,2})(?:-(\\d{1,2}))?");
+	boost::smatch match;
+
+	if (!regex_match(text, match, regex))
+		throw std::runtime_error("expected tap count or tap range, but found: '" + text + "'");
+
+	if (match[2].matched) {
+		int n = std::stoi(match[1]);
+		int m = std::stoi(match[2]);
+		return std::make_pair(n, m);
+	} else {
+		int n = std::stoi(match[1]);
+		return std::make_pair(n, n);
+	}
 }
 
 bool create_directory_if_not_exists(fs::path path) {
@@ -224,8 +251,8 @@ void prepare_and_handle_files(
 	}
 }
 
-void solve_levels(icl::interval_set<int> &level_set, opt::variables_map &variables, Logger &logger) {
-	Solver solver(logger);
+void solve_levels(icl::interval_set<int> &level_set, opt::variables_map &variables, std::pair<int, int> range, Logger &logger) {
+	Solver solver(logger, range.first, range.second);
 	solver.unsolved = variables.count("unsolved");
 	solver.dry = variables.count("dry");
 	for(icl::interval_set<int>::element_iterator level_it = elements_begin(level_set);
