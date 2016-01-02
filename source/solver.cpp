@@ -49,7 +49,7 @@ void Solver::set_tap_range(int a, int b) {
 }
 
 void Solver::solve_level(int level_number) {
-	std::cout << level_number << ": " << std::flush;
+	std::cout << "level " << std::setfill(' ') << std::setw(3) << level_number << ": " << std::flush;
 	std::string solution_name = solution_filename(level_number);
 	if (unsolved && fs::is_regular_file(fs::path(solution_name))) {
 		std::cout << "skipping" << std::endl;
@@ -65,18 +65,21 @@ void Solver::solve_level(int level_number) {
 		solutions_checked += finder.get_solutions_checked();
 		logger.stop_search(list.get_tap_count(), list.get_action_count());
 		if (!list.empty()) {
-			bool error = false;
+			std::cout << "success" << std::flush;
 			if (!dry) {
+				bool error = false;
 				RGB_Image image = Solution_Painter(*level, list.get_solutions(), reference_images).paint(error);
 				image.save(solution_name, error);
+				if (error) {
+					std::cout << ": " << RGB_Image::get_error_text() << std::flush;
+				}
 			}
-			std::cout << (error ? RGB_Image::get_error_text() : "success") << ": " << std::flush;
+			std::cout << std::endl;
 		} else {
-			std::cout << "failure: " << std::flush;
+			std::cout << "failure" << std::endl;
 		}
 	}
 	free_level(level);
-	std::cout << "done" << std::endl;
 }
 
 Configuration *Solver::load_level(std::string filename, bool &error) {
