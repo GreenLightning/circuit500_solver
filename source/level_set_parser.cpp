@@ -1,9 +1,9 @@
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include <boost/icl/interval_set.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
 #include "level_set_parser.hpp"
@@ -33,7 +33,7 @@ void Level_Set_Parser::parse_input(std::string input) {
 }
 
 void Level_Set_Parser::parse_level_number(std::string level_text) {
-	int level = boost::lexical_cast<int>(level_text);
+	int level = std::stoi(level_text);
 	if (level < 1)
 		throw std::runtime_error("level number must be greater than 0, but was: '" + level_text + "'");
 	if (level > 500)
@@ -42,8 +42,8 @@ void Level_Set_Parser::parse_level_number(std::string level_text) {
 }
 
 void Level_Set_Parser::parse_level_interval(std::string low_text, std::string high_text) {
-	int low = boost::lexical_cast<int>(low_text);
-	int high = boost::lexical_cast<int>(high_text);
+	int low = std::stoi(low_text);
+	int high = std::stoi(high_text);
 	if (low > high)
 		throw std::runtime_error("must specify smaller level number first: '" + low_text + "-" + high_text + "'");
 	if (low < 1)
