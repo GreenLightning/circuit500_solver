@@ -1,11 +1,11 @@
 #ifndef LEVEL_SET_PARSER
 #define LEVEL_SET_PARSER
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#include <boost/regex.hpp>
 #include <boost/icl/interval_set.hpp>
+#include <boost/regex.hpp>
 
 namespace icl = boost::icl;
 

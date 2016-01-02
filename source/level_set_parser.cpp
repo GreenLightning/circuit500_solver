@@ -1,10 +1,10 @@
-#include <vector>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
-#include <boost/regex.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/icl/interval_set.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 
 #include "level_set_parser.hpp"
 

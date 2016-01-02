@@ -1,5 +1,5 @@
-#include "tile.hpp"
 #include "board.hpp"
+#include "tile.hpp"
 
 #include "configuration.hpp"
 

@@ -5,9 +5,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-#include <string>
 #include <cstring>
 #include <sstream>
+#include <string>
 #include <utility>
 
 #include "rgb_image.hpp"

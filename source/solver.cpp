@@ -1,23 +1,24 @@
 #include <cstdint>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#include <fstream>
-#include <string>
 #include <cstring>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include <boost/filesystem.hpp>
 
-#include "rgb_image.hpp"
 #include "logger.hpp"
-#include "solver/tile.hpp"
+#include "rgb_image.hpp"
 #include "solver/board.hpp"
-#include "solver/reference.hpp"
 #include "solver/configuration.hpp"
+#include "solver/reference.hpp"
 #include "solver/solution_list.hpp"
 #include "solver/solution_painter.hpp"
+#include "solver/tile.hpp"
+
 #include "solver.hpp"
 
 namespace fs = boost::filesystem;

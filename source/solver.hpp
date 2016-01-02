@@ -1,8 +1,8 @@
-#include "solver/configuration.hpp"
-#include "solver/solution_list.hpp"
-#include "solver/board.hpp"
 #include "logger.hpp"
 #include "rgb_image.hpp"
+#include "solver/board.hpp"
+#include "solver/configuration.hpp"
+#include "solver/solution_list.hpp"
 
 class Solver {
 public:

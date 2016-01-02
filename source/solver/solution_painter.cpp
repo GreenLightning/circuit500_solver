@@ -1,10 +1,10 @@
-#include <vector>
 #include <algorithm>
+#include <vector>
 
 #include "../rgb_image.hpp"
 #include "board.hpp"
-#include "reference.hpp"
 #include "configuration.hpp"
+#include "reference.hpp"
 
 #include "solution_painter.hpp"
 

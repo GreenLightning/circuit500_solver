@@ -3,8 +3,8 @@
 
 #include <cstdint>
 
-#include "tile.hpp"
 #include "board.hpp"
+#include "tile.hpp"
 
 const int maximum_number_of_taps = 6;
 

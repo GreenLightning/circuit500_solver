@@ -1,15 +1,15 @@
-#include <iostream>
+#include <cstdlib>
 #include <iomanip>
-#include <vector>
+#include <iostream>
 #include <iterator>
 #include <stdexcept>
 #include <string>
-#include <cstdlib>
+#include <vector>
 
-#include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
 #include <boost/icl/interval_set.hpp>
+#include <boost/program_options.hpp>
+#include <boost/regex.hpp>
 
 #include "level_set_parser.hpp"
 #include "logger.hpp"
