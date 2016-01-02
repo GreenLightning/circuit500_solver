@@ -8,7 +8,6 @@
 
 #include <boost/regex.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include <boost/icl/interval_set.hpp>
 
@@ -27,6 +26,10 @@ void prepare_and_handle_files(
 	std::vector<fs::path> &files_to_prepare,
 	std::vector<fs::path> &files_to_handle,
 	icl::interval_set<int> &levels_to_solve);
+void solve_levels(
+	icl::interval_set<int> &levels_to_solve,
+	bool unsolved,
+	Logger &logger);
 
 int main(int argument_count, char **argument_values) {
 	try {
@@ -216,4 +219,13 @@ void prepare_and_handle_files(
 		int level_number = preparer.prepare(it);
 		if (level_number != 0) levels_to_solve.insert(level_number);
 	}
+}
+
+void solve_levels(icl::interval_set<int> &level_set, bool unsolved, Logger &logger) {
+	Solver solver(logger);
+	solver.unsolved = unsolved;
+	for(icl::interval_set<int>::element_iterator level_it = elements_begin(level_set);
+		level_it != elements_end(level_set);
+		++level_it)
+		solver.solve_level(*level_it);
 }
