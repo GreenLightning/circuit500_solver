@@ -4,7 +4,7 @@
 #include "sizes.hpp"
 #include "tile.hpp"
 
-const int board_size = level_tile_width * level_tile_height;
+constexpr int board_size = level_tile_width * level_tile_height;
 
 typedef Tile Board[board_size];
 

@@ -6,9 +6,9 @@
 #include "../rgb_image.hpp"
 #include "tile.hpp"
 
-const int number_of_references = 32;
+constexpr int number_of_references = 32;
 
-const std::string reference_names[number_of_references] = {
+constexpr std::string reference_names[number_of_references] = {
 	"gap",
 	"empty",
 	"corner_0",
@@ -43,7 +43,7 @@ const std::string reference_names[number_of_references] = {
 	"end_filled_3"
 };
 
-const Tile reference_tiles[number_of_references] = {
+constexpr Tile reference_tiles[number_of_references] = {
 	create_gap(),
 	create_tile(false, false, false, false),
 	create_tile(true, true, false, false),

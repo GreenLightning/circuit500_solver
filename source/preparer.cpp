@@ -12,19 +12,19 @@
 
 namespace fs = boost::filesystem;
 
-const int digit_width = 8;
-const int digit_height = 9;
+constexpr int digit_width = 8;
+constexpr int digit_height = 9;
 
-const int raw_base_width = 160;
-const int raw_base_height = 284;
+constexpr int raw_base_width = 160;
+constexpr int raw_base_height = 284;
 
-const int level_number_x = 90;
-const int level_number_y = 25;
+constexpr int level_number_x = 90;
+constexpr int level_number_y = 25;
 
-const int area_x = 16;
-const int area_y = 47;
-const int area_width = 128;
-const int area_height = 192;
+constexpr int area_x = 16;
+constexpr int area_y = 47;
+constexpr int area_width = 128;
+constexpr int area_height = 192;
 
 Preparer::Preparer()
 	: load_error(false), buffer(create_buffer()), digits(load_digits()) {}

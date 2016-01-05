@@ -8,8 +8,8 @@
 
 #include "solution_painter.hpp"
 
-const int painter_border = tile_size;
-const int painter_spacing = tile_size;
+constexpr int painter_border = tile_size;
+constexpr int painter_spacing = tile_size;
 
 Solution_Painter::Solution_Painter(Configuration level, std::vector<Configuration> &list, RGB_Image **reference_images)
 	: level(level), list(list), reference_images(reference_images) {}
