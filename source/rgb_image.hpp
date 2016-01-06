@@ -110,4 +110,12 @@ public:
 	void copy_to(RGB_Image &destination, bool &error);
 };
 
+inline bool RGB_Image::is_error() {
+	return data == nullptr;
+}
+
+inline std::string RGB_Image::get_error_text() {
+	return error_text;
+}
+
 #endif

@@ -40,14 +40,6 @@ RGB_Image::~RGB_Image() {
 
 std::string RGB_Image::error_text = "";
 
-inline bool RGB_Image::is_error() {
-	return data == nullptr;
-}
-
-std::string RGB_Image::get_error_text() {
-	return error_text;
-}
-
 inline RGB_Image RGB_Image::create_error() {
 	return RGB_Image();
 }
