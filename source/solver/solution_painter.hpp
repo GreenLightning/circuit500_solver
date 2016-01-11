@@ -1,5 +1,4 @@
-#ifndef SOLUTION_PAINTER
-#define SOLUTION_PAINTER
+#pragma once
 
 #include <vector>
 
@@ -25,5 +24,3 @@ private:
 	std::vector<Configuration> &list;
 	RGB_Image **reference_images;
 };
-
-#endif

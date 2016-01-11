@@ -1,5 +1,4 @@
-#ifndef LEVEL_SET_PARSER
-#define LEVEL_SET_PARSER
+#pragma once
 
 #include <string>
 #include <vector>
@@ -23,5 +22,3 @@ private:
 	const boost::regex regex;
 	icl::interval_set<int> level_set; 
 };
-
-#endif

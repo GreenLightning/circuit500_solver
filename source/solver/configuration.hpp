@@ -1,5 +1,4 @@
-#ifndef CONFIGURATION
-#define CONFIGURATION
+#pragma once
 
 #include <cstdint>
 
@@ -17,5 +16,3 @@ struct Configuration {
 
 Configuration with_tap(Configuration config, Board_Position tap, bool &failed);
 Configuration with_tap(Configuration config, Board_Position tap);
-
-#endif

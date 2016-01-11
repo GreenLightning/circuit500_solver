@@ -1,5 +1,4 @@
-#ifndef TILE
-#define TILE
+#pragma once
 
 #include <cstdint>
 
@@ -100,5 +99,3 @@ inline bool connects_down(Tile t, Tile partner) {
 inline bool connects_left(Tile t, Tile partner) {
 	return connects(t, tile_direction_left) && connects(partner, tile_direction_right);
 }
-
-#endif

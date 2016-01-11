@@ -1,5 +1,4 @@
-#ifndef SOLUTION_LIST
-#define SOLUTION_LIST
+#pragma once
 
 #include <cstdint>
 #include <vector>
@@ -24,5 +23,3 @@ private:
 	std::uint8_t action_count;
 	std::vector<Configuration> solutions;
 };
-
-#endif

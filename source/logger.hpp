@@ -1,5 +1,4 @@
-#ifndef LOGGER
-#define LOGGER
+#pragma once
 
 class Logger {
 public:
@@ -10,5 +9,3 @@ public:
 	virtual long long int &start_search(int level) = 0;
 	virtual void stop_search(int taps, int actions) = 0;
 };
-
-#endif

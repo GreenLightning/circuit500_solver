@@ -1,5 +1,4 @@
-#ifndef RGB_IMAGE
-#define RGB_IMAGE
+#pragma once
 
 #include <string>
 
@@ -117,5 +116,3 @@ inline bool RGB_Image::is_error() {
 inline std::string RGB_Image::get_error_text() {
 	return error_text;
 }
-
-#endif

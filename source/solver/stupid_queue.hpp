@@ -1,5 +1,4 @@
-#ifndef STUPID_QUEUE
-#define STUPID_QUEUE
+#pragma once
 
 #include <cstddef>
 
@@ -35,5 +34,3 @@ private:
 	std::size_t first;
 	std::size_t last;
 };
-
-#endif

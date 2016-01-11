@@ -1,5 +1,4 @@
-#ifndef BOARD
-#define BOARD
+#pragma once
 
 #include "sizes.hpp"
 #include "tile.hpp"
@@ -86,5 +85,3 @@ struct Board_State {
 
 void reset_board_state(Board_State &state);
 void update_board_state(const Board &board, Board_State &state);
-
-#endif
