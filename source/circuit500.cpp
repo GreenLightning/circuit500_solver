@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <regex>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -10,7 +11,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/icl/interval_set.hpp>
 #include <boost/program_options.hpp>
-#include <boost/regex.hpp>
 
 #include "level_set_parser.hpp"
 #include "logger.hpp"
@@ -206,8 +206,8 @@ void check_conflicting_options(opt::variables_map &variables, std::string master
 }
 
 std::pair<int,int> parse_range(std::string text) {
-	boost::regex regex("(\\d{1,2})(?:-(\\d{1,2}))?");
-	boost::smatch match;
+	std::regex regex("(\\d{1,2})(?:-(\\d{1,2}))?");
+	std::smatch match;
 
 	if (!regex_match(text, match, regex))
 		throw std::runtime_error("expected tap count or tap range, but found: '" + text + "'");

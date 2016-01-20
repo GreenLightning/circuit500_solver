@@ -1,10 +1,10 @@
 #include <iostream>
+#include <regex>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 #include <boost/icl/interval_set.hpp>
-#include <boost/regex.hpp>
 
 #include "level_set_parser.hpp"
 
@@ -21,7 +21,7 @@ icl::interval_set<int> Level_Set_Parser::parse() {
 }
 
 void Level_Set_Parser::parse_input(std::string input) {
-	boost::smatch match;
+	std::smatch match;
 
 	if (!regex_match(input, match, regex))
 		throw std::runtime_error("expected level number or level range, but found: '" + input + "'");
