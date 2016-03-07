@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "sizes.hpp"
 #include "tile.hpp"
 
@@ -63,6 +65,10 @@ public:
 		return Board_Position(index - 1);
 	}
 
+	uint32_t get_mask() const {
+		return uint32_t(1) << index;
+	}
+
 	Board_Position& operator ++() {
 		++index;
 		return *this;
@@ -78,10 +84,21 @@ private:
 
 bool boards_are_equal(const Board &one, const Board &two);
 
-struct Board_State {
-	bool filled[board_size];
-	bool solved;
-};
+class Board_State {
 
-void reset_board_state(Board_State &state);
-void update_board_state(const Board &board, Board_State &state);
+private:
+	static constexpr uint32_t SOLVED_FLAG = uint32_t(1) << 31;
+
+public:
+	void update(const Board& board);
+	bool is_solved() { return state & SOLVED_FLAG; }
+	bool is_filled(Board_Position position) { return state & position.get_mask(); }
+
+private:
+	void reset() { state = 0; }
+	void set_solved() { state |= SOLVED_FLAG; }
+	void set_filled(Board_Position position) { state |= position.get_mask(); }
+
+private:
+	uint32_t state;
+};

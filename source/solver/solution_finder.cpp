@@ -25,8 +25,8 @@ void Solution_Finder::find(const Configuration &configuration) {
 
 void Solution_Finder::find_all(const Configuration &configuration) {
 	++solutions_checked;
-	update_board_state(configuration.board, state);
-	if (state.solved) {
+	state.update(configuration.board);
+	if (state.is_solved()) {
 		list.append(configuration);
 	} else if (configuration.tap_count < max_taps) {
 		for (Board_Position position = 0; position < board_size; ++position) {

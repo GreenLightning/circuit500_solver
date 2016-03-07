@@ -67,7 +67,7 @@ void Solution_Painter::paint_solution(RGB_Image &destination, Configuration leve
 }
 
 RGB_Image Solution_Painter::paint_board_at_offset(RGB_Image &destination, Board &board, Board_State &state, int offset) {
-	update_board_state(board, state);
+	state.update(board);
 	int x = offset * (level_pixel_width + painter_spacing), y = 0;
 	int width = level_pixel_width, height = destination.getHeight();
 	RGB_Image board_view = destination.create_view(x, y, width, height, *error);
@@ -80,7 +80,7 @@ void Solution_Painter::paint_board(RGB_Image &destination, Board &board, Board_S
 		for (int x = 0; x < level_tile_width; ++x) {
 			Board_Position position(x, y);
 			RGB_Image tile_view = destination.create_view(x * tile_size, y * tile_size, tile_size, tile_size, *error);
-			RGB_Image &ref_img = *reference_images[get_reference_index(board[position], state.filled[position])];
+			RGB_Image &ref_img = *reference_images[get_reference_index(board[position], state.is_filled(position))];
 			ref_img.copy_to(tile_view, *error);
 		}
 	}
