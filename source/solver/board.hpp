@@ -7,11 +7,9 @@
 
 constexpr int board_size = level_tile_width * level_tile_height;
 
-typedef Tile Board[board_size];
-
 class Board_Position {
+	friend class Board;
 public:
-
 	Board_Position()
 		: index(0) {}
 
@@ -82,7 +80,14 @@ private:
 	uint8_t index;
 };
 
-bool boards_are_equal(const Board &one, const Board &two);
+class Board {
+public:
+	Tile& operator[](Board_Position position) { return data[position.index]; }
+	const Tile& operator[](Board_Position position) const { return data[position.index]; }
+	friend bool operator==(const Board& one, const Board& two);
+private:
+	Tile data[board_size];
+};
 
 class Board_State {
 

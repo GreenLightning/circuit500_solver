@@ -13,7 +13,7 @@ inline void Solution_List::push_first(const Configuration &config) {
 
 inline bool Solution_List::contains(const Configuration &config) {
 	for (auto &&solution : solutions)
-		if (boards_are_equal(config.board, solution.board))
+		if (config.board == solution.board)
 			return true;
 	return false;
 }

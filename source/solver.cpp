@@ -84,7 +84,7 @@ void Solver::solve_level(int level_number) {
 
 Configuration *Solver::load_level(std::string filename, bool &error) {
 	if (error) return nullptr;
-	Configuration *config = new Configuration{0};
+	Configuration *config = new Configuration;
 	if (config == nullptr) {
 		std::cout << "Error: out of memory while allocating configuration." << std::endl;
 		error = true;

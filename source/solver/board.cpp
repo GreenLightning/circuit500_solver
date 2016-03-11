@@ -2,7 +2,7 @@
 
 #include "board.hpp"
 
-bool boards_are_equal(const Board &one, const Board &two) {
+bool operator==(const Board& one, const Board& two) {
 	for (Board_Position position = 0; position < board_size; ++position)
 		if (get_normalized(one[position]) != get_normalized(two[position]))
 			return false;
