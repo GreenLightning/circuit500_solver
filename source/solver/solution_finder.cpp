@@ -7,7 +7,7 @@
 Solution_Finder::Solution_Finder(int min_taps, int max_taps) :
 	min_taps(min_taps), max_taps(max_taps), solutions_checked(0) {}
 
-void Solution_Finder::find(const Configuration &configuration) {
+void Solution_Finder::find(const Configuration& configuration) {
 	if (configuration.tap_count + 1 < min_taps) {
 		for (Board_Position position = 0; position < board_size; ++position) {
 			bool error = false;
@@ -23,7 +23,7 @@ void Solution_Finder::find(const Configuration &configuration) {
 	}
 }
 
-void Solution_Finder::find_all(const Configuration &configuration) {
+void Solution_Finder::find_all(const Configuration& configuration) {
 	++solutions_checked;
 	state.update(configuration.board);
 	if (state.is_solved()) {

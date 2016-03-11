@@ -39,9 +39,9 @@ RGB_Image Preparer::create_buffer() {
 	return buffer;
 }
 
-RGB_Image **Preparer::load_digits() {
+RGB_Image** Preparer::load_digits() {
 	if (load_error) return nullptr;
-	RGB_Image **digits = new RGB_Image*[10];
+	RGB_Image** digits = new RGB_Image*[10];
 	if (digits == nullptr) {
 		std::cout << "error: out of memory while allocating digit array" << std::endl;
 		load_error = true;
@@ -86,8 +86,8 @@ int Preparer::prepare(fs::path file) {
 	int scale_y = raw.getHeight() / raw_base_height;
 	for (int y = 0; y < raw_base_height; ++y) {
 		for (int x = 0; x < raw_base_width; ++x) {
-			unsigned char *buffer_pos = buffer.getData(x, y);
-			unsigned char *raw_pos = raw.getData(x * scale_x, y * scale_y);
+			unsigned char* buffer_pos = buffer.getData(x, y);
+			unsigned char* raw_pos = raw.getData(x * scale_x, y * scale_y);
 			for (int component = 0; component < 3; ++component) buffer_pos[component] = raw_pos[component];
 		}
 	}
@@ -114,7 +114,7 @@ int Preparer::find_level_number() {
 			int buffer_digit_x = level_number_x + digit_offset * digit_width;
 			int buffer_digit_y = level_number_y;
 			RGB_Image buffer_digit = buffer.create_view(buffer_digit_x, buffer_digit_y, digit_width, digit_height, image_error);
-			RGB_Image *test_digit = digits[digit_index];
+			RGB_Image* test_digit = digits[digit_index];
 			if (buffer_digit.equals(*test_digit, image_error)) break;
 			if (image_error) { std::cout << RGB_Image::get_error_text() << ": "; return 0; }
 		}

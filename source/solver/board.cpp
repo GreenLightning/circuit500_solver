@@ -9,7 +9,7 @@ bool operator==(const Board& one, const Board& two) {
 	return true;
 }
 
-void Board_State::update(const Board &board) {
+void Board_State::update(const Board& board) {
 	reset();
 	Stupid_Queue<Board_Position, board_size> open;
 	for (Board_Position position = 0; position < board_size; ++position) {

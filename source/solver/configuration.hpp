@@ -17,5 +17,5 @@ public:
 	std::uint8_t action_count;
 };
 
-Configuration with_tap(Configuration config, Board_Position tap, bool &failed);
+Configuration with_tap(Configuration config, Board_Position tap, bool& failed);
 Configuration with_tap(Configuration config, Board_Position tap);

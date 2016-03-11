@@ -11,10 +11,10 @@
 constexpr int painter_border = tile_size;
 constexpr int painter_spacing = tile_size;
 
-Solution_Painter::Solution_Painter(Configuration level, std::vector<Configuration> &list, RGB_Image **reference_images)
+Solution_Painter::Solution_Painter(Configuration level, std::vector<Configuration>& list, RGB_Image** reference_images)
 	: level(level), list(list), reference_images(reference_images) {}
 
-RGB_Image Solution_Painter::paint(bool &error) {
+RGB_Image Solution_Painter::paint(bool& error) {
 	this->error = &error;
 	int list_width = list_pixel_width();
 	int list_height = list_pixel_height();
@@ -27,7 +27,7 @@ RGB_Image Solution_Painter::paint(bool &error) {
 
 int Solution_Painter::list_pixel_width() {
 	int width = 0;
-	for(auto &&solution : list)
+	for(auto&& solution : list)
 		width = std::max(width, solution_pixel_width(solution));
 	return width;
 }
@@ -40,7 +40,7 @@ int Solution_Painter::solution_pixel_width(Configuration solution) {
 	return solution.tap_count * (level_pixel_width + painter_spacing) + level_pixel_width;
 }
 
-void Solution_Painter::paint_list(RGB_Image &destination) {
+void Solution_Painter::paint_list(RGB_Image& destination) {
 	if (*error) return;
 	int offset = 0;
 	for (auto solution = list.begin(); solution != list.end(); ++solution, ++offset) {
@@ -51,7 +51,7 @@ void Solution_Painter::paint_list(RGB_Image &destination) {
 	}
 }
 
-void Solution_Painter::paint_solution(RGB_Image &destination, Configuration level, Configuration solution) {
+void Solution_Painter::paint_solution(RGB_Image& destination, Configuration level, Configuration solution) {
 	if (*error) return;
 	Board_State state;
 	int position = 0;
@@ -66,7 +66,7 @@ void Solution_Painter::paint_solution(RGB_Image &destination, Configuration leve
 	paint_board_at_offset(destination, level.board, state, position);
 }
 
-RGB_Image Solution_Painter::paint_board_at_offset(RGB_Image &destination, Board &board, Board_State &state, int offset) {
+RGB_Image Solution_Painter::paint_board_at_offset(RGB_Image& destination, Board& board, Board_State& state, int offset) {
 	state.update(board);
 	int x = offset * (level_pixel_width + painter_spacing), y = 0;
 	int width = level_pixel_width, height = destination.getHeight();
@@ -75,12 +75,12 @@ RGB_Image Solution_Painter::paint_board_at_offset(RGB_Image &destination, Board 
 	return board_view;
 }
 
-void Solution_Painter::paint_board(RGB_Image &destination, Board &board, Board_State &state) {
+void Solution_Painter::paint_board(RGB_Image& destination, Board& board, Board_State& state) {
 	for (int y = 0; y < level_tile_height; ++y) {
 		for (int x = 0; x < level_tile_width; ++x) {
 			Board_Position position(x, y);
 			RGB_Image tile_view = destination.create_view(x * tile_size, y * tile_size, tile_size, tile_size, *error);
-			RGB_Image &ref_img = *reference_images[get_reference_index(board[position], state.is_filled(position))];
+			RGB_Image& ref_img = *reference_images[get_reference_index(board[position], state.is_filled(position))];
 			ref_img.copy_to(tile_view, *error);
 		}
 	}

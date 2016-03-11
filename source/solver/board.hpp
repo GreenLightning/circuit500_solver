@@ -67,7 +67,7 @@ public:
 		return uint32_t(1) << index;
 	}
 
-	Board_Position& operator ++() {
+	Board_Position& operator++() {
 		++index;
 		return *this;
 	}

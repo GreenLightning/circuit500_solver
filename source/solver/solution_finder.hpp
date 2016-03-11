@@ -9,10 +9,10 @@ public:
 	long long int get_solutions_checked();
 	Solution_List get_solution_list();
 
-	void find(const Configuration &configuration);
+	void find(const Configuration& configuration);
 
 private:
-	void find_all(const Configuration &configuration);
+	void find_all(const Configuration& configuration);
 
 private:
 	int min_taps;

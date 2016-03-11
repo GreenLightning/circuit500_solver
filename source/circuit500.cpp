@@ -21,20 +21,20 @@ namespace fs = boost::filesystem;
 namespace icl = boost::icl;
 namespace opt = boost::program_options;
 
-void check_conflicting_options(opt::variables_map &variables, std::string master, std::string slave);
+void check_conflicting_options(opt::variables_map& variables, std::string master, std::string slave);
 std::pair<int,int> parse_range(std::string text);
 bool create_directory_if_not_exists(fs::path path);
 void prepare_and_handle_files(
-	std::vector<fs::path> &files_to_prepare,
-	std::vector<fs::path> &files_to_handle,
-	icl::interval_set<int> &levels_to_solve);
+	std::vector<fs::path>& files_to_prepare,
+	std::vector<fs::path>& files_to_handle,
+	icl::interval_set<int>& levels_to_solve);
 void solve_levels(
-	icl::interval_set<int> &levels_to_solve,
-	opt::variables_map &variables,
+	icl::interval_set<int>& levels_to_solve,
+	opt::variables_map& variables,
 	std::pair<int,int> range,
-	Logger &logger);
+	Logger& logger);
 
-int main(int argument_count, char **argument_values) {
+int main(int argument_count, char** argument_values) {
 	try {
 		opt::options_description description(
 			"Solves circuit500 levels.\n\n"
@@ -148,27 +148,27 @@ int main(int argument_count, char **argument_values) {
 		icl::interval_set<int> levels_to_solve;
 
 		if (variables.count("prepare-all")) {
-			for (auto &&entry : fs::directory_iterator("data/raw/")) {
+			for (auto&& entry : fs::directory_iterator("data/raw/")) {
 				files_to_prepare.push_back(entry.path());
 			}
 		}
 		if (variables.count("prepare")) {
 			fs::path dir = "data/raw";
 			std::vector<std::string> input_list = variables["prepare"].as<std::vector<std::string>>();
-			for (auto &&entry : input_list) {
+			for (auto&& entry : input_list) {
 				files_to_prepare.push_back(dir / entry);
 			}
 		}
 
 		if (variables.count("handle-all")) {
-			for (auto &&entry : fs::directory_iterator("data/raw/")) {
+			for (auto&& entry : fs::directory_iterator("data/raw/")) {
 				files_to_handle.push_back(entry.path());
 			}
 		}
 		if (variables.count("handle")) {
 			fs::path dir = "data/raw";
 			std::vector<std::string> input_list = variables["handle"].as<std::vector<std::string>>();
-			for (auto &&entry : input_list) {
+			for (auto&& entry : input_list) {
 				files_to_handle.push_back(dir / entry);
 			}	
 		}
@@ -183,7 +183,7 @@ int main(int argument_count, char **argument_values) {
 
 		std::pair<int,int> range = parse_range(variables["range"].as<std::string>());
 
-		Logger *logger = variables.count("log") ? Logger::create_file_logger() : Logger::create_fake_logger();
+		Logger* logger = variables.count("log") ? Logger::create_file_logger() : Logger::create_fake_logger();
 		if (!logger) {
 			throw std::runtime_error("out of memory: failed to create logger");
 		}
@@ -200,7 +200,7 @@ int main(int argument_count, char **argument_values) {
 	}
 }
 
-void check_conflicting_options(opt::variables_map &variables, std::string master, std::string slave) {
+void check_conflicting_options(opt::variables_map& variables, std::string master, std::string slave) {
 	if (variables.count(master) && variables.count(slave))
 			throw std::runtime_error(slave + " is not allowed if " + master + " is used");
 }
@@ -228,9 +228,9 @@ bool create_directory_if_not_exists(fs::path path) {
 }
 
 void prepare_and_handle_files(
-	std::vector<fs::path> &files_to_prepare,
-	std::vector<fs::path> &files_to_handle,
-	icl::interval_set<int> &levels_to_solve) {
+	std::vector<fs::path>& files_to_prepare,
+	std::vector<fs::path>& files_to_handle,
+	icl::interval_set<int>& levels_to_solve) {
 
 	Preparer preparer;
 	if (!preparer.is_initialized()) return;
@@ -251,7 +251,7 @@ void prepare_and_handle_files(
 	}
 }
 
-void solve_levels(icl::interval_set<int> &level_set, opt::variables_map &variables, std::pair<int, int> range, Logger &logger) {
+void solve_levels(icl::interval_set<int>& level_set, opt::variables_map& variables, std::pair<int, int> range, Logger& logger) {
 	Solver solver(logger, range.first, range.second);
 	solver.unsolved = variables.count("unsolved");
 	solver.dry = variables.count("dry");

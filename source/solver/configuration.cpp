@@ -3,7 +3,7 @@
 
 #include "configuration.hpp"
 
-Configuration with_move(Configuration &config, Board_Position tap_position, Board_Position gap_position) {
+Configuration with_move(Configuration& config, Board_Position tap_position, Board_Position gap_position) {
 	Tile tap_tile = config.board[tap_position];
 	config.board[tap_position] = config.board[gap_position];
 	config.board[gap_position] = tap_tile;
@@ -11,7 +11,7 @@ Configuration with_move(Configuration &config, Board_Position tap_position, Boar
 	return config;
 }
 
-Configuration with_tap(Configuration config, Board_Position tap, bool &failed) {
+Configuration with_tap(Configuration config, Board_Position tap, bool& failed) {
 	config.taps[config.tap_count++] = tap;
 	if (tap.has_up()) {
 		Board_Position up = tap.get_up();

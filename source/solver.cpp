@@ -29,7 +29,7 @@ int Solver::tap_maximum() {
 	return maximum_number_of_taps;
 }
 
-Solver::Solver(Logger &logger, int min_taps, int max_taps) :
+Solver::Solver(Logger& logger, int min_taps, int max_taps) :
 	logger(logger), unsolved(false), dry(false), min_taps(min_taps), max_taps(max_taps) {
 	bool error = false;
 	reference_images = load_reference_images(error);
@@ -56,9 +56,9 @@ void Solver::solve_level(int level_number) {
 		return;
 	}
 	bool level_error = false;
-	Configuration *level = load_level(level_filename(level_number), level_error);
+	Configuration* level = load_level(level_filename(level_number), level_error);
 	if (!level_error) {
-		long long int & solutions_checked = logger.start_search(level_number);
+		long long int& solutions_checked = logger.start_search(level_number);
 		Solution_Finder finder(min_taps, max_taps);
 		finder.find(*level);
 		Solution_List list = finder.get_solution_list();
@@ -82,9 +82,9 @@ void Solver::solve_level(int level_number) {
 	free_level(level);
 }
 
-Configuration *Solver::load_level(std::string filename, bool &error) {
+Configuration* Solver::load_level(std::string filename, bool& error) {
 	if (error) return nullptr;
-	Configuration *config = new Configuration;
+	Configuration* config = new Configuration;
 	if (config == nullptr) {
 		std::cout << "Error: out of memory while allocating configuration." << std::endl;
 		error = true;
@@ -112,7 +112,7 @@ Configuration *Solver::load_level(std::string filename, bool &error) {
 	return config;
 }
 
-void Solver::free_level(Configuration *level) {
+void Solver::free_level(Configuration* level) {
 	delete level;
 }
 

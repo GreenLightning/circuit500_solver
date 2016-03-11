@@ -22,9 +22,9 @@ int get_reference_index(Tile tile, bool filled) {
 	return -1;
 }
 
-RGB_Image **load_reference_images(bool &error) {
+RGB_Image** load_reference_images(bool& error) {
 	if (error) return nullptr;
-	RGB_Image **reference_images = new RGB_Image*[number_of_references];
+	RGB_Image** reference_images = new RGB_Image*[number_of_references];
 	if (reference_images == nullptr) {
 		std::cout << "Error: Out of memory while allocating reference array." << std::endl;
 		error = true;
@@ -38,6 +38,6 @@ RGB_Image **load_reference_images(bool &error) {
 	return reference_images;
 }
 
-void free_reference_images(RGB_Image **reference_images) {
+void free_reference_images(RGB_Image** reference_images) {
 	delete [] reference_images;
 }

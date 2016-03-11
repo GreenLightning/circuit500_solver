@@ -78,5 +78,5 @@ constexpr Tile reference_tiles[number_of_references] = {
 };
 
 int get_reference_index(Tile tile, bool filled);
-RGB_Image **load_reference_images(bool &error);
-void free_reference_images(RGB_Image **reference_images);
+RGB_Image** load_reference_images(bool& error);
+void free_reference_images(RGB_Image** reference_images);

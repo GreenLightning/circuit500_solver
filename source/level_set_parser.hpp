@@ -10,7 +10,7 @@ namespace icl = boost::icl;
 
 class Level_Set_Parser {
 public:
-	Level_Set_Parser(const std::vector<std::string> &input_list);
+	Level_Set_Parser(const std::vector<std::string>& input_list);
 	icl::interval_set<int> parse();
 
 private:
@@ -18,7 +18,7 @@ private:
 	void parse_level_number(std::string level_text);
 	void parse_level_interval(std::string low_text, std::string high_text);
 	
-	const std::vector<std::string> &input_list;
+	const std::vector<std::string>& input_list;
 	const std::regex regex;
 	icl::interval_set<int> level_set; 
 };

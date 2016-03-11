@@ -10,7 +10,7 @@
 
 namespace icl = boost::icl;
 
-Level_Set_Parser::Level_Set_Parser(const std::vector<std::string> &input_list) :
+Level_Set_Parser::Level_Set_Parser(const std::vector<std::string>& input_list) :
 	input_list(input_list),
 	regex("(\\d{1,3})(?:-(\\d{1,3}))?") {}
 

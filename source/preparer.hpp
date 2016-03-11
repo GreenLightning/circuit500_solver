@@ -10,7 +10,7 @@ public:
 
 private:
 	RGB_Image create_buffer();
-	RGB_Image **load_digits();
+	RGB_Image** load_digits();
 
 public:
 	bool is_initialized();
@@ -22,5 +22,5 @@ private:
 private:
 	bool load_error;
 	RGB_Image buffer;
-	RGB_Image **digits;
+	RGB_Image** digits;
 };

@@ -14,7 +14,7 @@ class File_Logger : public Logger {
 public:
 	File_Logger();
 	virtual ~File_Logger();
-	virtual long long int &start_search(int level);
+	virtual long long int& start_search(int level);
 	virtual void stop_search(int taps, int actions);
 private:
 	std::ofstream log_file;
@@ -49,7 +49,7 @@ File_Logger::~File_Logger() {
 	log_file << std::setw(7) << std::fixed << std::setprecision(2) << solved_percentage << "%";
 }
 
-long long int & File_Logger::start_search(int level) {
+long long int& File_Logger::start_search(int level) {
 	current_level = level;
 	solutions_checked = 0;
 	start = std::chrono::high_resolution_clock::now();
@@ -86,7 +86,7 @@ void File_Logger::stop_search(int taps, int actions) {
 class Fake_Logger : public Logger {
 public:
 
-	virtual long long int &start_search(int level) {
+	virtual long long int& start_search(int level) {
 		return dummy = 0;
 	}
 
@@ -96,10 +96,10 @@ private:
 	long long int dummy;
 };
 
-Logger * Logger::create_file_logger() {
+Logger* Logger::create_file_logger() {
 	return new File_Logger();
 }
 
-Logger * Logger::create_fake_logger() {
+Logger* Logger::create_fake_logger() {
 	return new Fake_Logger();
 }
