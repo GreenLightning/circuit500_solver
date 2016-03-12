@@ -25,7 +25,7 @@
  * 11 = other (empty or normal pipes)
  */
 
-typedef std::uint8_t Tile;
+typedef uint8_t Tile;
 
 constexpr Tile tile_type_bits  = 0b00001100;
 constexpr Tile tile_rotation_bits = 0b00000011;

@@ -19,7 +19,7 @@ private:
 	bool contains(const Configuration& config);
 private:
 	bool found;
-	std::uint8_t tap_count;
-	std::uint8_t action_count;
+	uint8_t tap_count;
+	uint8_t action_count;
 	std::vector<Configuration> solutions;
 };

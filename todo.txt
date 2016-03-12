@@ -1,3 +1,2 @@
-- class refactoring
 - rgb_image exceptions
 - multithreading
