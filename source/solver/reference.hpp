@@ -1,82 +1,55 @@
 #pragma once
 
-#include <string>
-
 #include "../rgb_image.hpp"
 #include "tile.hpp"
 
 constexpr int number_of_references = 32;
 
-constexpr std::string reference_names[number_of_references] = {
-	"gap",
-	"empty",
-	"corner_0",
-	"corner_1",
-	"corner_2",
-	"corner_3",
-	"junction_0",
-	"junction_1",
-	"junction_2",
-	"junction_3",
-	"cross",
-	"end_0",
-	"end_1",
-	"end_2",
-	"end_3",
-	"start_0",
-	"start_1",
-	"start_2",
-	"start_3",
-	"corner_filled_0",
-	"corner_filled_1",
-	"corner_filled_2",
-	"corner_filled_3",
-	"junction_filled_0",
-	"junction_filled_1",
-	"junction_filled_2",
-	"junction_filled_3",
-	"cross_filled",
-	"end_filled_0",
-	"end_filled_1",
-	"end_filled_2",
-	"end_filled_3"
+class Reference_Info {
+public:
+	constexpr Reference_Info(const char* name, Tile tile, bool start, bool end, bool gap, bool filled)
+		: name(name), tile(tile), start(start), end(end), gap(gap), filled(filled) {}
+
+	const char* name;
+	Tile tile;
+	bool start, end, gap, filled;
 };
 
-constexpr Tile reference_tiles[number_of_references] = {
-	create_gap(),
-	create_tile(false, false, false, false),
-	create_tile(true, true, false, false),
-	create_tile(false, true, true, false),
-	create_tile(false, false, true, true),
-	create_tile(true, false, false, true),
-	create_tile(false, true, true, true),
-	create_tile(true, false, true, true),
-	create_tile(true, true, false, true),
-	create_tile(true, true, true, false),
-	create_tile(true, true, true, true),
-	create_end(tile_direction_up),
-	create_end(tile_direction_right),
-	create_end(tile_direction_down),
-	create_end(tile_direction_left),
-	create_start(tile_direction_up),
-	create_start(tile_direction_right),
-	create_start(tile_direction_down),
-	create_start(tile_direction_left),
-	create_tile(true, true, false, false),
-	create_tile(false, true, true, false),
-	create_tile(false, false, true, true),
-	create_tile(true, false, false, true),
-	create_tile(false, true, true, true),
-	create_tile(true, false, true, true),
-	create_tile(true, true, false, true),
-	create_tile(true, true, true, false),
-	create_tile(true, true, true, true),
-	create_end(tile_direction_up),
-	create_end(tile_direction_right),
-	create_end(tile_direction_down),
-	create_end(tile_direction_left)
+constexpr Reference_Info reference_infos[number_of_references] = {
+	{ "gap",               create_tile(false, false, false, false), false, false, true,  false },
+	{ "empty",             create_tile(false, false, false, false), false, false, false, false },
+	{ "corner_0",          create_tile(true, true, false, false),   false, false, false, false },
+	{ "corner_1",          create_tile(false, true, true, false),   false, false, false, false },
+	{ "corner_2",          create_tile(false, false, true, true),   false, false, false, false },
+	{ "corner_3",          create_tile(true, false, false, true),   false, false, false, false },
+	{ "junction_0",        create_tile(false, true, true, true),    false, false, false, false },
+	{ "junction_1",        create_tile(true, false, true, true),    false, false, false, false },
+	{ "junction_2",        create_tile(true, true, false, true),    false, false, false, false },
+	{ "junction_3",        create_tile(true, true, true, false),    false, false, false, false },
+	{ "cross",             create_tile(true, true, true, true),     false, false, false, false },
+	{ "end_0",             tile_direction_up,                       false, true,  false, false },
+	{ "end_1",             tile_direction_right,                    false, true,  false, false },
+	{ "end_2",             tile_direction_down,                     false, true,  false, false },
+	{ "end_3",             tile_direction_left,                     false, true,  false, false },
+	{ "start_0",           tile_direction_up,                       true,  false, false, true  },
+	{ "start_1",           tile_direction_right,                    true,  false, false, true  },
+	{ "start_2",           tile_direction_down,                     true,  false, false, true  },
+	{ "start_3",           tile_direction_left,                     true,  false, false, true  },
+	{ "corner_filled_0",   create_tile(true, true, false, false),   false, false, false, true  },
+	{ "corner_filled_1",   create_tile(false, true, true, false),   false, false, false, true  },
+	{ "corner_filled_2",   create_tile(false, false, true, true),   false, false, false, true  },
+	{ "corner_filled_3",   create_tile(true, false, false, true),   false, false, false, true  },
+	{ "junction_filled_0", create_tile(false, true, true, true),    false, false, false, true  },
+	{ "junction_filled_1", create_tile(true, false, true, true),    false, false, false, true  },
+	{ "junction_filled_2", create_tile(true, true, false, true),    false, false, false, true  },
+	{ "junction_filled_3", create_tile(true, true, true, false),    false, false, false, true  },
+	{ "cross_filled",      create_tile(true, true, true, true),     false, false, false, true  },
+	{ "end_filled_0",      tile_direction_up,                       false, true,  false, true  },
+	{ "end_filled_1",      tile_direction_right,                    false, true,  false, true  },
+	{ "end_filled_2",      tile_direction_down,                     false, true,  false, true  },
+	{ "end_filled_3",      tile_direction_left,                     false, true,  false, true  }
 };
 
-int get_reference_index(Tile tile, bool filled);
+int get_reference_index(Tile tile, bool start, bool end, bool gap, bool filled);
 RGB_Image** load_reference_images(bool& error);
 void free_reference_images(RGB_Image** reference_images);

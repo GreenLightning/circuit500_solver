@@ -8,16 +8,16 @@
 
 #include "reference.hpp"
 
-int get_reference_index(Tile tile, bool filled) {
+int get_reference_index(Tile tile, bool start, bool end, bool gap, bool filled) {
 	Tile normal = get_normalized(tile);
-	if (!filled) {
-		for (int i = 0; i < 15; ++i)
-			if (normal == reference_tiles[i])
-				return i;
-	} else {
-		for (int i = 15; i < number_of_references; ++i)
-			if (normal == reference_tiles[i])
-				return i;
+	for (int i = 0; i < number_of_references; ++i) {
+		const Reference_Info& info = reference_infos[i];
+		if (info.tile == normal
+			&& info.start == start
+			&& info.end == end
+			&& info.gap == gap
+			&& info.filled == filled)
+			return i;
 	}
 	return -1;
 }
@@ -32,7 +32,7 @@ RGB_Image** load_reference_images(bool& error) {
 	}
 	for (int i = 0; i < number_of_references; ++i) {
 		std::ostringstream filename;
-		filename << "data/reference/tile_" << reference_names[i] << ".png";
+		filename << "data/reference/tile_" << reference_infos[i].name << ".png";
 		reference_images[i] = new RGB_Image(RGB_Image::load(filename.str(), tile_size, tile_size, error));
 	}
 	return reference_images;

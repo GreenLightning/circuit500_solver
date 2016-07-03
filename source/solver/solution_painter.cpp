@@ -80,7 +80,11 @@ void Solution_Painter::paint_board(RGB_Image& destination, Board& board, Board_S
 		for (int x = 0; x < level_tile_width; ++x) {
 			Board_Position position(x, y);
 			RGB_Image tile_view = destination.create_view(x * tile_size, y * tile_size, tile_size, tile_size, *error);
-			RGB_Image& ref_img = *reference_images[get_reference_index(board[position], state.is_filled(position))];
+			bool start = board.is_start(position);
+			bool end = board.is_end(position);
+			bool gap = board.is_gap(position);
+			bool filled = state.is_filled(position);
+			RGB_Image& ref_img = *reference_images[get_reference_index(board[position], start, end, gap, filled)];
 			ref_img.copy_to(tile_view, *error);
 		}
 	}

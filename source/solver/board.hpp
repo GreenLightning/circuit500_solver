@@ -82,11 +82,39 @@ private:
 
 class Board {
 public:
-	Tile& operator[](Board_Position position) { return data[position.index]; }
-	const Tile& operator[](Board_Position position) const { return data[position.index]; }
+	Board() : start(255), end(255), gap(255) {}
+	Tile operator[](Board_Position position) const { return data[position.index]; }
 	friend bool operator==(const Board& one, const Board& two);
+
+	Board_Position get_start() const { return start; }
+
+	bool is_start(Board_Position position) const { return position == start; }
+	bool is_end(Board_Position position) const { return position == end; }
+	bool is_gap(Board_Position position) const { return position == gap; }
+
+	void swap_with_gap(Board_Position position) {
+		Tile tmp = data[position];
+		data[position] = data[gap];
+		data[gap] = tmp;
+		if (position == start) start = gap;
+		if (position == end) end = gap;
+		gap = position;
+	}
+
+	void rotate(Board_Position position) {
+		data[position] = get_rotated(data[position]);
+	}
+
+	void set(Board_Position position, Tile tile, bool is_start, bool is_end, bool is_gap) {
+		data[position] = tile;
+		if (is_start) start = position;
+		if (is_end) end = position;
+		if (is_gap) gap = position;
+	}
+
 private:
 	Tile data[board_size];
+	Board_Position start, end, gap;
 };
 
 class Board_State {

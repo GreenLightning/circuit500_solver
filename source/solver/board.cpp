@@ -12,17 +12,12 @@ bool operator==(const Board& one, const Board& two) {
 void Board_State::update(const Board& board) {
 	reset();
 	Stupid_Queue<Board_Position, board_size> open;
-	for (Board_Position position = 0; position < board_size; ++position) {
-		if (is_start(board[position])) {
-			set_filled(position);
-			open.push(position);
-			break;
-		}
-	}
+	open.push(board.get_start());
+	set_filled(board.get_start());
 	while (!open.empty()) {
 		Board_Position current = open.pop();
+		if (board.is_end(current)) set_solved();
 		Tile currentTile = board[current];
-		if (is_end(currentTile)) set_solved();
 		if (current.has_up()) {
 			Board_Position up = current.get_up();
 			if (connects_up(currentTile, board[up]) && !is_filled(up)) {

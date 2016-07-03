@@ -99,7 +99,8 @@ Configuration* Solver::load_level(std::string filename, bool& error) {
 				if (level_tile.equals(*reference_images[reference_index], error))
 					break;
 			if (reference_index < number_of_references) {
-				config->board[Board_Position(x, y)] = reference_tiles[reference_index];
+				const Reference_Info& info = reference_infos[reference_index];
+				config->board.set(Board_Position(x, y), info.tile, info.start, info.end, info.gap);
 			} else {
 				std::cout << "Unknown tile found." << std::endl;
 				error = true;
