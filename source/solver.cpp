@@ -25,27 +25,23 @@
 
 namespace fs = boost::filesystem;
 
+int Solver::tap_minimum() {
+	return 1;
+}
+
 int Solver::tap_maximum() {
 	return maximum_number_of_taps;
 }
 
-Solver::Solver(Logger& logger, int min_taps, int max_taps) :
-	logger(logger), unsolved(false), dry(false), min_taps(min_taps), max_taps(max_taps) {
+Solver::Solver(Logger& logger, int max_taps) :
+	logger(logger), unsolved(false), dry(false), max_taps(max_taps) {
 	bool error = false;
 	reference_images = load_reference_images(error);
-	if (error)
-		throw std::runtime_error("could not load reference images");
+	if (error) throw std::runtime_error("could not load reference images");
 }
 
 Solver::~Solver() {
 	free_reference_images(reference_images);
-}
-
-void Solver::set_tap_range(int a, int b) {
-	int min = std::min(a, b);
-	int max = std::max(a, b);
-	min_taps = std::max(min, 1);
-	max_taps = std::min(max, maximum_number_of_taps);
 }
 
 void Solver::solve_level(int level_number) {
@@ -59,7 +55,7 @@ void Solver::solve_level(int level_number) {
 	Configuration* level = load_level(level_filename(level_number), level_error);
 	if (!level_error) {
 		long long int& solutions_checked = logger.start_search(level_number);
-		Solution_Finder finder(min_taps, max_taps);
+		Solution_Finder finder(max_taps);
 		finder.find(*level);
 		Solution_List list = finder.get_solution_list();
 		solutions_checked += finder.get_solutions_checked();

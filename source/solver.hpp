@@ -4,12 +4,12 @@
 
 class Solver {
 public:
+	static int tap_minimum();
 	static int tap_maximum();
 
-	Solver(Logger& logger, int min_taps, int max_taps);
+	Solver(Logger& logger, int max_taps);
 	~Solver();
 
-	void set_tap_range(int a, int b);
 	void solve_level(int level_number);
 
 private:
@@ -24,7 +24,6 @@ public:
 	bool dry;
 
 private:
-	int min_taps;
 	int max_taps;
 
 private:

@@ -22,7 +22,7 @@ namespace icl = boost::icl;
 namespace opt = boost::program_options;
 
 void check_conflicting_options(opt::variables_map& variables, std::string master, std::string slave);
-std::pair<int,int> parse_range(std::string text);
+int parse_max_taps(std::string text);
 bool create_directory_if_not_exists(fs::path path);
 void prepare_and_handle_files(
 	std::vector<fs::path>& files_to_prepare,
@@ -31,7 +31,7 @@ void prepare_and_handle_files(
 void solve_levels(
 	icl::interval_set<int>& levels_to_solve,
 	opt::variables_map& variables,
-	std::pair<int,int> range,
+	int max_taps,
 	Logger& logger);
 
 int main(int argument_count, char** argument_values) {
@@ -68,10 +68,10 @@ int main(int argument_count, char** argument_values) {
 				"Solves only those levels for which it cannot already find a solution inside "
 				"'data/solutions/'.\n")
 
-			("range,r", opt::value<std::string>()->default_value("1-3"),
-				("Specifies the range of taps to check for solutions.\n"
-				"Must be either N or N-M.\n"
-				"N and M must be between 1 and " + std::to_string(Solver::tap_maximum()) + " (both inclusive).\n").c_str())
+			("taps,t", opt::value<std::string>()->default_value("3"),
+				("Specifies the maximum number of taps to check for solutions.\n"
+				 "Must be between " + std::to_string(Solver::tap_minimum()) +
+				 " and " + std::to_string(Solver::tap_maximum()) + " (both inclusive).\n").c_str())
 
 			("prepare,p", opt::value<std::vector<std::string>>()->multitoken(),
 				"Prepares the specified files.\n"
@@ -181,7 +181,7 @@ int main(int argument_count, char** argument_values) {
 			levels_to_solve += Level_Set_Parser(input_list).parse();
 		}
 
-		std::pair<int,int> range = parse_range(variables["range"].as<std::string>());
+		int max_taps = parse_max_taps(variables["taps"].as<std::string>());
 
 		Logger* logger = variables.count("log") ? Logger::create_file_logger() : Logger::create_fake_logger();
 		if (!logger) {
@@ -189,7 +189,7 @@ int main(int argument_count, char** argument_values) {
 		}
 
 		prepare_and_handle_files(files_to_prepare, files_to_handle, levels_to_solve);
-		solve_levels(levels_to_solve, variables, range, *logger);
+		solve_levels(levels_to_solve, variables, max_taps, *logger);
 
 		delete logger;
 
@@ -205,21 +205,19 @@ void check_conflicting_options(opt::variables_map& variables, std::string master
 			throw std::runtime_error(slave + " is not allowed if " + master + " is used");
 }
 
-std::pair<int,int> parse_range(std::string text) {
-	std::regex regex("(\\d{1,2})(?:-(\\d{1,2}))?");
+int parse_max_taps(std::string text) {
+	std::regex regex("\\d{1,3}");
 	std::smatch match;
 
 	if (!regex_match(text, match, regex))
-		throw std::runtime_error("expected tap count or tap range, but found: '" + text + "'");
+		throw std::runtime_error("expected tap count, but found: '" + text + "'");
 
-	if (match[2].matched) {
-		int n = std::stoi(match[1]);
-		int m = std::stoi(match[2]);
-		return std::make_pair(n, m);
-	} else {
-		int n = std::stoi(match[1]);
-		return std::make_pair(n, n);
-	}
+	int max_taps = std::stoi(match[0]);
+	if (max_taps < Solver::tap_minimum())
+		throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_minimum()) + " or more, but was: '" + text + "'");
+	if (max_taps > Solver::tap_maximum())
+		throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_maximum()) + " or less, but was: '" + text + "'");
+	return max_taps;
 }
 
 bool create_directory_if_not_exists(fs::path path) {
@@ -251,8 +249,8 @@ void prepare_and_handle_files(
 	}
 }
 
-void solve_levels(icl::interval_set<int>& level_set, opt::variables_map& variables, std::pair<int, int> range, Logger& logger) {
-	Solver solver(logger, range.first, range.second);
+void solve_levels(icl::interval_set<int>& level_set, opt::variables_map& variables, int max_taps, Logger& logger) {
+	Solver solver(logger, max_taps);
 	solver.unsolved = variables.count("unsolved");
 	solver.dry = variables.count("dry");
 	for(icl::interval_set<int>::element_iterator level_it = elements_begin(level_set);
