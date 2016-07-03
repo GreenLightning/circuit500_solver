@@ -61,7 +61,7 @@ void Solution_Painter::paint_solution(RGB_Image& destination, Configuration leve
 		int x = tap.get_tile_x() * tile_size, y = tap.get_tile_y() * tile_size;
 		RGB_Image tap_view = board_view.create_view(x, y, tile_size, tile_size, *error);
 		tap_view.tint(0x80ff0000, *error);
-		level = with_tap(level, tap);
+		level = with_tap(level, tap).config;
 	}
 	paint_board_at_offset(destination, level.board, state, position);
 }

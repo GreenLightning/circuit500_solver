@@ -10,15 +10,13 @@ Solution_Finder::Solution_Finder(int min_taps, int max_taps) :
 void Solution_Finder::find(const Configuration& configuration) {
 	if (configuration.tap_count + 1 < min_taps) {
 		for (Board_Position position = 0; position < board_size; ++position) {
-			bool error = false;
-			Configuration next = with_tap(configuration, position, error);
-			if (!error) find(next);
+			Tap_Result result = with_tap(configuration, position);
+			if (result.changed) find(result.config);
 		}
 	} else {
 		for (Board_Position position = 0; position < board_size; ++position) {
-			bool error = false;
-			Configuration next = with_tap(configuration, position, error);
-			if (!error) find_all(next);
+			Tap_Result result = with_tap(configuration, position);
+			if (result.changed) find_all(result.config);
 		}
 	}
 }
@@ -30,9 +28,8 @@ void Solution_Finder::find_all(const Configuration& configuration) {
 		list.append(configuration);
 	} else if (configuration.tap_count < max_taps) {
 		for (Board_Position position = 0; position < board_size; ++position) {
-			bool error = false;
-			Configuration next = with_tap(configuration, position, error);
-			if (!error) find_all(next);
+			Tap_Result result = with_tap(configuration, position);
+			if (result.changed) find_all(result.config);
 		}
 	}
 }

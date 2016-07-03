@@ -17,5 +17,9 @@ public:
 	uint8_t action_count;
 };
 
-Configuration with_tap(Configuration config, Board_Position tap, bool& failed);
-Configuration with_tap(Configuration config, Board_Position tap);
+struct Tap_Result {
+	Configuration config;
+	bool changed;
+};
+
+Tap_Result with_tap(const Configuration& config, Board_Position tap);
