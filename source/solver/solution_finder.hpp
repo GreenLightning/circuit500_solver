@@ -9,7 +9,7 @@ public:
 	long long int get_solutions_checked();
 	Solution_List get_solution_list();
 
-	void find(const Configuration& configuration);
+	void find(const Configuration& configuration, Board_Position start = Board_Position());
 
 private:
 	int max_taps;

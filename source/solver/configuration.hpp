@@ -20,6 +20,7 @@ public:
 struct Tap_Result {
 	Configuration config;
 	bool changed;
+	bool moved;
 };
 
 Tap_Result with_tap(const Configuration& config, Board_Position tap);

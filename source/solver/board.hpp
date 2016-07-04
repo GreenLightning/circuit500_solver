@@ -86,7 +86,10 @@ public:
 	Tile operator[](Board_Position position) const { return data[position.index]; }
 	friend bool operator==(const Board& one, const Board& two);
 
+	bool has_gap() const { return gap < board_size; }
+
 	Board_Position get_start() const { return start; }
+	Board_Position get_gap() const { return gap; }
 
 	bool is_start(Board_Position position) const { return position == start; }
 	bool is_end(Board_Position position) const { return position == end; }

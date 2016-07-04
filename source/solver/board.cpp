@@ -6,7 +6,7 @@ bool operator==(const Board& one, const Board& two) {
 	for (Board_Position position = 0; position < board_size; ++position)
 		if (get_normalized(one[position]) != get_normalized(two[position]))
 			return false;
-	return true;
+	return one.start == two.start && one.end == two.end && one.gap == two.gap;
 }
 
 void Board_State::update(const Board& board) {
