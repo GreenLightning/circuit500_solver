@@ -11,7 +11,7 @@
 constexpr int painter_border = tile_size;
 constexpr int painter_spacing = tile_size;
 
-Solution_Painter::Solution_Painter(Configuration level, std::vector<Configuration>& list, RGB_Image** reference_images)
+Solution_Painter::Solution_Painter(Configuration level, const std::vector<Configuration>& list, RGB_Image** reference_images)
 	: level(level), list(list), reference_images(reference_images) {}
 
 RGB_Image Solution_Painter::paint(bool& error) {
@@ -21,7 +21,8 @@ RGB_Image Solution_Painter::paint(bool& error) {
 	int image_width = list_width + 2 * painter_border;
 	int image_height = list_height + 2 * painter_border;
 	RGB_Image image = RGB_Image::create(image_width, image_height, 0x000000, error);
-	paint_list(image.create_view(painter_border, painter_border, list_width, list_height, error));
+	RGB_Image list_view = image.create_view(painter_border, painter_border, list_width, list_height, error);
+	paint_list(list_view);
 	return image;
 }
 

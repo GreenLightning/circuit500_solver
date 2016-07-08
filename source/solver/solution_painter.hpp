@@ -8,7 +8,7 @@
 
 class Solution_Painter {
 public:
-	Solution_Painter(Configuration level, std::vector<Configuration>& list, RGB_Image** reference_images);
+	Solution_Painter(Configuration level, const std::vector<Configuration>& list, RGB_Image** reference_images);
 	RGB_Image paint(bool& error);
 private:
 	int list_pixel_width();
@@ -21,6 +21,6 @@ private:
 private:
 	bool* error;
 	Configuration level;
-	std::vector<Configuration>& list;
+	const std::vector<Configuration>& list;
 	RGB_Image** reference_images;
 };
