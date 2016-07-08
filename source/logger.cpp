@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 #include <boost/date_time.hpp>
 
@@ -12,7 +13,7 @@ namespace pt = boost::posix_time;
 
 class File_Logger : public Logger {
 public:
-	File_Logger();
+	File_Logger(const std::string& header);
 	virtual ~File_Logger();
 	virtual long long int& start_search(int level);
 	virtual void stop_search(int taps, int actions);
@@ -29,11 +30,13 @@ private:
 	std::chrono::high_resolution_clock::time_point start;
 };
 
-File_Logger::File_Logger() : level_count(0), total_solutions(0), total_time(std::chrono::nanoseconds(0)), solved_level_count(0) {
+File_Logger::File_Logger(const std::string& header)
+	: level_count(0), total_solutions(0), total_time(std::chrono::nanoseconds(0)), solved_level_count(0) {
 	std::ostringstream log_name;
 	log_name.imbue(std::locale(log_name.getloc(), new pt::time_facet("%Y-%m-%d_%H.%M.%S")));
 	log_name << "data/logs/log_" << pt::microsec_clock::local_time() << ".txt";
 	this->log_file = std::ofstream(log_name.str());
+	this->log_file << header << std::endl;
 	this->log_file << "level; solutions; nanoseconds; taps; actions" << std::endl;
 	this->current_level = 0;
 }
@@ -96,10 +99,10 @@ private:
 	long long int dummy;
 };
 
-Logger* Logger::create_file_logger() {
-	return new File_Logger();
+Logger* Logger::create_file_logger(const std::string& header) {
+	return new File_Logger(header);
 }
 
-Logger* Logger::create_fake_logger() {
+Logger* Logger::create_fake_logger(const std::string& header) {
 	return new Fake_Logger();
 }

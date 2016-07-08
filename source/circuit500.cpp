@@ -196,7 +196,36 @@ int main(int argument_count, char** argument_values) {
 				throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_maximum()) + " or less, but was: '" + text + "'");
 		}
 
-		Logger* logger = variables.count("log") ? Logger::create_file_logger() : Logger::create_fake_logger();
+		std::string header;
+		// create header for log
+		// contains normalized list of arguments
+		// normalized means not all arguments are mentioned,
+		// the long form is always used and the order is fixed
+		{
+			if (variables.count("log"))
+				header += " --log";
+
+			if (contains(levels_to_solve, icl::interval<int>::closed(1, 500))) {
+				header += " --solve-all";
+			} else if (!is_empty(levels_to_solve)) {
+				header += " --solve";
+				for (auto it = levels_to_solve.begin(); it != levels_to_solve.end(); ++it) {
+					int low = first(*it);
+					int high = last(*it);
+					header += " " + std::to_string(low);
+					if (high != low) header += "-" + std::to_string(high);
+				}
+			}
+
+			if (variables.count("unsolved"))
+				header += " --unsolved";
+
+			header += " --taps " + std::to_string(max_taps);
+
+			if (!header.empty()) header.erase(0, 1);
+		}
+
+		Logger* logger = variables.count("log") ? Logger::create_file_logger(header) : Logger::create_fake_logger(header);
 		if (!logger)
 			throw std::runtime_error("out of memory: failed to create logger");
 

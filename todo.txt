@@ -1,2 +1,1 @@
-- include options in log file
 - multithreading
