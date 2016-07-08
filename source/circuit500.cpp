@@ -22,7 +22,6 @@ namespace icl = boost::icl;
 namespace opt = boost::program_options;
 
 void check_conflicting_options(opt::variables_map& variables, std::string master, std::string slave);
-int parse_max_taps(std::string text);
 bool create_directory_if_not_exists(fs::path path);
 void prepare_and_handle_files(
 	std::vector<fs::path>& files_to_prepare,
@@ -181,12 +180,25 @@ int main(int argument_count, char** argument_values) {
 			levels_to_solve += Level_Set_Parser(input_list).parse();
 		}
 
-		int max_taps = parse_max_taps(variables["taps"].as<std::string>());
+		int max_taps;
+		{
+			std::string text = variables["taps"].as<std::string>();
+			std::regex regex("\\d{1,3}");
+			std::smatch match;
+
+			if (!regex_match(text, match, regex))
+				throw std::runtime_error("expected tap count, but found: '" + text + "'");
+
+			max_taps = std::stoi(match[0]);
+			if (max_taps < Solver::tap_minimum())
+				throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_minimum()) + " or more, but was: '" + text + "'");
+			if (max_taps > Solver::tap_maximum())
+				throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_maximum()) + " or less, but was: '" + text + "'");
+		}
 
 		Logger* logger = variables.count("log") ? Logger::create_file_logger() : Logger::create_fake_logger();
-		if (!logger) {
+		if (!logger)
 			throw std::runtime_error("out of memory: failed to create logger");
-		}
 
 		prepare_and_handle_files(files_to_prepare, files_to_handle, levels_to_solve);
 		solve_levels(levels_to_solve, variables, max_taps, *logger);
@@ -203,21 +215,6 @@ int main(int argument_count, char** argument_values) {
 void check_conflicting_options(opt::variables_map& variables, std::string master, std::string slave) {
 	if (variables.count(master) && variables.count(slave))
 			throw std::runtime_error(slave + " is not allowed if " + master + " is used");
-}
-
-int parse_max_taps(std::string text) {
-	std::regex regex("\\d{1,3}");
-	std::smatch match;
-
-	if (!regex_match(text, match, regex))
-		throw std::runtime_error("expected tap count, but found: '" + text + "'");
-
-	int max_taps = std::stoi(match[0]);
-	if (max_taps < Solver::tap_minimum())
-		throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_minimum()) + " or more, but was: '" + text + "'");
-	if (max_taps > Solver::tap_maximum())
-		throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_maximum()) + " or less, but was: '" + text + "'");
-	return max_taps;
 }
 
 bool create_directory_if_not_exists(fs::path path) {
