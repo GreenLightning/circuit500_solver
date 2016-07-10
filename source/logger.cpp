@@ -1,6 +1,7 @@
 #include <chrono>
 #include <fstream>
 #include <iomanip>
+#include <locale>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -30,24 +31,32 @@ private:
 	std::chrono::high_resolution_clock::time_point start;
 };
 
+struct separators : std::numpunct<char> {
+   char do_thousands_sep() const { return ' '; }
+   std::string do_grouping() const { return "\3"; }
+};
+
 File_Logger::File_Logger(const std::string& header)
 	: level_count(0), total_solutions(0), total_time(std::chrono::nanoseconds(0)), solved_level_count(0) {
+
 	std::ostringstream log_name;
 	log_name.imbue(std::locale(log_name.getloc(), new pt::time_facet("%Y-%m-%d_%H.%M.%S")));
 	log_name << "data/logs/log_" << pt::microsec_clock::local_time() << ".txt";
-	this->log_file = std::ofstream(log_name.str());
-	this->log_file << header << std::endl;
-	this->log_file << "level; solutions; nanoseconds; taps; actions" << std::endl;
-	this->current_level = 0;
+
+	log_file = std::ofstream(log_name.str());
+	log_file.imbue(std::locale(log_file.getloc(), new separators));
+	log_file << header << std::endl;
+	log_file << "level;          solutions;        nanoseconds; taps; actions" << std::endl;
+	current_level = 0;
 }
 
 File_Logger::~File_Logger() {
 	double solved_percentage = (100.0 * solved_level_count) / level_count;
 
-	log_file << "------------------ totals ------------------\n";
+	log_file << "-------------------------- totals --------------------------\n";
 	log_file << std::setw(5) << level_count << ";";
-	log_file << std::setw(10) << total_solutions << ";";
-	log_file << std::setw(12) << total_time.count()  << ";";
+	log_file << std::setw(19) << total_solutions << ";";
+	log_file << std::setw(19) << total_time.count()  << ";";
 	log_file << std::setw(5) << solved_level_count << ";";
 	log_file << std::setw(7) << std::fixed << std::setprecision(2) << solved_percentage << "%";
 }
@@ -56,7 +65,6 @@ long long int& File_Logger::start_search(int level) {
 	current_level = level;
 	solutions_checked = 0;
 	start = std::chrono::high_resolution_clock::now();
-
 	return solutions_checked;
 }
 
@@ -72,8 +80,8 @@ void File_Logger::stop_search(int taps, int actions) {
 	if (solved) solved_level_count += 1;
 
 	log_file << std::setw(5) << current_level << ";";
-	log_file << std::setw(10) << solutions_checked << ";";
-	log_file << std::setw(12) << duration.count() << ";";
+	log_file << std::setw(19) << solutions_checked << ";";
+	log_file << std::setw(19) << duration.count() << ";";
 	if (solved) {
 		log_file << std::setw(5) << taps << ";";
 		log_file << std::setw(8) << actions << "\n";
