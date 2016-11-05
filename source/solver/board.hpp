@@ -13,7 +13,7 @@ public:
 	Board_Position()
 		: index(0) {}
 
-	Board_Position(uint8_t index)
+	Board_Position(uint_fast8_t index)
 		: index(index) {}
 
 	Board_Position(int tile_x, int tile_y)
@@ -63,8 +63,8 @@ public:
 		return Board_Position(index - 1);
 	}
 
-	uint32_t get_mask() const {
-		return uint32_t(1) << index;
+	uint_fast32_t get_mask() const {
+		return uint_fast32_t(1) << index;
 	}
 
 	Board_Position& operator++() {
@@ -72,12 +72,12 @@ public:
 		return *this;
 	}
 
-	operator uint8_t() const {
+	operator uint_fast8_t() const {
 		return index;
 	}
 
 private:
-	uint8_t index;
+	uint_fast8_t index;
 };
 
 class Board {
@@ -123,7 +123,7 @@ private:
 class Board_State {
 
 private:
-	static constexpr uint32_t SOLVED_FLAG = uint32_t(1) << 31;
+	static constexpr uint_fast32_t SOLVED_FLAG = uint32_t(1) << 31;
 
 public:
 	void update(const Board& board);
@@ -136,5 +136,5 @@ private:
 	void set_filled(Board_Position position) { state |= position.get_mask(); }
 
 private:
-	uint32_t state;
+	uint_fast32_t state;
 };
