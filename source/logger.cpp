@@ -1,4 +1,5 @@
 #include <chrono>
+#include <ctime>
 #include <fstream>
 #include <iomanip>
 #include <locale>
@@ -6,11 +7,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <boost/date_time.hpp>
-
 #include "logger.hpp"
-
-namespace pt = boost::posix_time;
 
 class File_Logger : public Logger {
 public:
@@ -39,11 +36,15 @@ struct separators : std::numpunct<char> {
 File_Logger::File_Logger(const std::string& header)
 	: level_count(0), total_solutions(0), total_time(std::chrono::nanoseconds(0)), solved_level_count(0) {
 
-	std::ostringstream log_name;
-	log_name.imbue(std::locale(log_name.getloc(), new pt::time_facet("%Y-%m-%d_%H.%M.%S")));
-	log_name << "data/logs/log_" << pt::microsec_clock::local_time() << ".txt";
+	char log_name[256];
+	{ // format log name with local time
+		std::time_t t = std::time(nullptr);
+		if (!std::strftime(log_name, sizeof(log_name), "data/logs/log_%Y-%m-%d_%H.%M.%S.txt", std::localtime(&t))) {
+			std::snprintf(log_name, sizeof(log_name), "data/logs/log.txt");
+		}
+	}
 
-	log_file = std::ofstream(log_name.str());
+	log_file = std::ofstream(log_name);
 	log_file.imbue(std::locale(log_file.getloc(), new separators));
 	log_file << header << std::endl;
 	log_file << "level;          solutions;        nanoseconds; taps; actions" << std::endl;

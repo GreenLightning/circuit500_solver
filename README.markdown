@@ -74,7 +74,7 @@ Options:
 Dependencies
 ============
 
-The project makes use of several [Boost libraries](http://www.boost.org) (Program Options, Filesystem, Interval Container Library and some others).
+The project makes use of several [Boost libraries](http://www.boost.org) (Program Options and Filesystem).
 
 stb_image.h and stb_image_write.h are used for image io ([link](https://github.com/nothings/stb)).
 

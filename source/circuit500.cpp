@@ -9,16 +9,15 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
-#include <boost/icl/interval_set.hpp>
 #include <boost/program_options.hpp>
 
+#include "level_set.hpp"
 #include "level_set_parser.hpp"
 #include "logger.hpp"
 #include "preparer.hpp"
 #include "solver.hpp"
 
 namespace fs = boost::filesystem;
-namespace icl = boost::icl;
 namespace opt = boost::program_options;
 
 void check_conflicting_options(opt::variables_map& variables, std::string master, std::string slave);
@@ -26,9 +25,9 @@ bool create_directory_if_not_exists(fs::path path);
 void prepare_and_handle_files(
 	std::vector<fs::path>& files_to_prepare,
 	std::vector<fs::path>& files_to_handle,
-	icl::interval_set<int>& levels_to_solve);
+	Level_Set& levels_to_solve);
 void solve_levels(
-	icl::interval_set<int>& levels_to_solve,
+	Level_Set& levels_to_solve,
 	opt::variables_map& variables,
 	int max_taps,
 	Logger& logger);
@@ -144,7 +143,7 @@ int main(int argument_count, char** argument_values) {
 
 		std::vector<fs::path> files_to_prepare;
 		std::vector<fs::path> files_to_handle;
-		icl::interval_set<int> levels_to_solve;
+		Level_Set levels_to_solve;
 
 		if (variables.count("prepare-all")) {
 			for (auto&& entry : fs::directory_iterator("data/raw/")) {
@@ -173,11 +172,11 @@ int main(int argument_count, char** argument_values) {
 		}
 		
 		if (variables.count("solve-all")) {
-			levels_to_solve.insert(icl::interval<int>::closed(1, 500));
+			levels_to_solve.set_all();
 		}
 		if (variables.count("solve")) {
 			std::vector<std::string> input_list = variables["solve"].as<std::vector<std::string>>();
-			levels_to_solve += Level_Set_Parser(input_list).parse();
+			Level_Set_Parser(input_list, levels_to_solve).parse();
 		}
 
 		int max_taps;
@@ -205,15 +204,19 @@ int main(int argument_count, char** argument_values) {
 			if (variables.count("log"))
 				header += " --log";
 
-			if (contains(levels_to_solve, icl::interval<int>::closed(1, 500))) {
+			if (levels_to_solve.is_full()) {
 				header += " --solve-all";
-			} else if (!is_empty(levels_to_solve)) {
+			} else if (!levels_to_solve.is_empty()) {
 				header += " --solve";
-				for (auto it = levels_to_solve.begin(); it != levels_to_solve.end(); ++it) {
-					int low = first(*it);
-					int high = last(*it);
+				size_t low = level_begin, high;
+				while (true) {
+					while (low != level_end && !levels_to_solve.is_set(low)) ++low;
+					high = low;
+					while (high != level_end && levels_to_solve.is_set(high)) ++high;
+					if (low == level_end) break;
 					header += " " + std::to_string(low);
-					if (high != low) header += "-" + std::to_string(high);
+					if (high - low > 1) header += "-" + std::to_string(high - 1);
+					low = high;
 				}
 			}
 
@@ -254,7 +257,7 @@ bool create_directory_if_not_exists(fs::path path) {
 void prepare_and_handle_files(
 	std::vector<fs::path>& files_to_prepare,
 	std::vector<fs::path>& files_to_handle,
-	icl::interval_set<int>& levels_to_solve) {
+	Level_Set& levels_to_solve) {
 
 	Preparer preparer;
 	if (!preparer.is_initialized()) return;
@@ -271,16 +274,15 @@ void prepare_and_handle_files(
 		int progress = 100 * (++count) / total;
 		std::cout << std::setfill(' ') << std::setw(3) << progress << "%: " << it.generic_string() << ": ";
 		int level_number = preparer.prepare(it);
-		if (level_number != 0) levels_to_solve.insert(level_number);
+		if (level_number != 0) levels_to_solve.set(level_number);
 	}
 }
 
-void solve_levels(icl::interval_set<int>& level_set, opt::variables_map& variables, int max_taps, Logger& logger) {
+void solve_levels(Level_Set& level_set, opt::variables_map& variables, int max_taps, Logger& logger) {
 	Solver solver(logger, max_taps);
 	solver.unsolved = variables.count("unsolved");
 	solver.dry = variables.count("dry");
-	for(icl::interval_set<int>::element_iterator level_it = elements_begin(level_set);
-		level_it != elements_end(level_set);
-		++level_it)
-		solver.solve_level(*level_it);
+	for (size_t i = level_begin; i != level_end; ++i)
+		if (level_set.is_set(i))
+			solver.solve_level(i);
 }

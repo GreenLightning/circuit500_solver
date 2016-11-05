@@ -4,14 +4,12 @@
 #include <string>
 #include <vector>
 
-#include <boost/icl/interval_set.hpp>
-
-namespace icl = boost::icl;
+#include "level_set.hpp"
 
 class Level_Set_Parser {
 public:
-	Level_Set_Parser(const std::vector<std::string>& input_list);
-	icl::interval_set<int> parse();
+	Level_Set_Parser(const std::vector<std::string>& input_list, Level_Set& level_set);
+	void parse();
 
 private:
 	void parse_input(const std::string input);
@@ -20,5 +18,5 @@ private:
 	
 	const std::vector<std::string>& input_list;
 	const std::regex regex;
-	icl::interval_set<int> level_set; 
+	Level_Set& level_set;
 };
