@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -8,8 +9,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include "logger.hpp"
 #include "rgb_image.hpp"
@@ -23,7 +22,7 @@
 
 #include "solver.hpp"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 int Solver::tap_minimum() {
 	return 1;

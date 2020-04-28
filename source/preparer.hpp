@@ -1,4 +1,4 @@
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "rgb_image.hpp"
 
@@ -14,7 +14,7 @@ private:
 
 public:
 	bool is_initialized();
-	int prepare(boost::filesystem::path file);
+	int prepare(std::filesystem::path file);
 
 private:
 	int find_level_number();

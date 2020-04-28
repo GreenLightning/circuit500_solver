@@ -3,3 +3,5 @@
 /data/levels/
 /data/solutions/
 /data/logs/
+
+.DS_Store

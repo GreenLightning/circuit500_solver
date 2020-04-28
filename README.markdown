@@ -74,8 +74,6 @@ Options:
 Dependencies
 ============
 
-The project makes use of several [Boost libraries](http://www.boost.org) (Program Options and Filesystem).
-
 stb_image.h and stb_image_write.h are used for image io ([link](https://github.com/nothings/stb)).
 
 Compiling
@@ -83,7 +81,7 @@ Compiling
 
 The project is currently compiled via the command line. On Windows, using Microsoft Visual Studio, this command is used to compile it:
 
-    cl /Fec500 /EHsc /I "%boost_root%" ..\source\*.cpp /link /LIBPATH:"%boost_root%\lib"
+    cl /Fec500 /EHsc /I "%boost_root%" ..\source\*.cpp /link
 
 License
 =======

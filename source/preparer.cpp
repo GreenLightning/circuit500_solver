@@ -1,16 +1,15 @@
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-
 #include "rgb_image.hpp"
 
 #include "preparer.hpp"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 constexpr int digit_width = 8;
 constexpr int digit_height = 9;

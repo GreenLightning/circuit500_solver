@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdio>
+
 constexpr size_t level_count = 500;
 constexpr size_t level_begin = 1;
 constexpr size_t level_end = level_count + 1;

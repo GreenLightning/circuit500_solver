@@ -1,4 +1,6 @@
+#include <cstdio>
 #include <cstdlib>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
@@ -8,126 +10,194 @@
 #include <utility>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
-
 #include "level_set.hpp"
 #include "level_set_parser.hpp"
 #include "logger.hpp"
 #include "preparer.hpp"
 #include "solver.hpp"
 
-namespace fs = boost::filesystem;
-namespace opt = boost::program_options;
+namespace fs = std::filesystem;
 
-void check_conflicting_options(opt::variables_map& variables, std::string master, std::string slave);
-bool create_directory_if_not_exists(fs::path path);
-void prepare_and_handle_files(
-	std::vector<fs::path>& files_to_prepare,
-	std::vector<fs::path>& files_to_handle,
-	Level_Set& levels_to_solve);
-void solve_levels(
-	Level_Set& levels_to_solve,
-	opt::variables_map& variables,
-	int max_taps,
-	Logger& logger);
+struct Options {
+	bool help = false;
+	bool log  = false;
+
+	bool dry      = false;
+	bool unsolved = false;
+
+	bool prepare_all = false;
+	bool solve_all   = false;
+	bool handle_all  = false;
+
+	int taps = 3;
+
+	std::vector<std::string> prepare;
+	std::vector<std::string> solve;
+	std::vector<std::string> handle;
+};
+
+const char* help_message = R"DONE(Solves circuit500 levels.
+
+All operations are performed in the 'data/' directory relative to the current
+working directory, which should already exist and contain some reference images
+for the solver inside 'data/reference/'.
+
+Screenshots of the levels should be placed inside the 'data/raw/' directory.
+
+During the preparation phase the program extracts the level number from the
+screenshots and places a normalized version of the level area in an
+appropriately named file inside the 'data/levels/' directory.
+
+During the solving phase the program attempts to solve the levels and
+puts solutions in the 'data/solutions/' directory.
+
+Options:
+  --help                 Prints this help message.
+                         
+  -l [ --log ]           Logs statistics about the solving phase into a log 
+                         file inside 'data/logs/'.
+                         
+  -d [ --dry ]           Does not save solutions during the solving phase.
+                         
+  -u [ --unsolved ]      Solves only those levels for which it cannot already 
+                         find a solution inside 'data/solutions/'.
+                         
+  -t [ --taps ] arg (=%d) Specifies the maximum number of taps to check for 
+                         solutions.
+                         Must be between %d and %d (both inclusive).
+                         
+  -p [ --prepare ] arg   Prepares the specified files.
+                         Must be followed by one or more filenames.
+                         Filenames must not include 'data/raw/'.
+                         
+  -P [ --prepare-all ]   Prepares all files in 'data/raw/'.
+                         
+  -s [ --solve ] arg     Solves the specified levels.
+                         Must be followed by one or more level descriptions in 
+                         the form of:
+                          X:   where X is a level number between 1 and 500. 
+                               Solves the specified level.
+                          X-Y: where X and Y are level numbers between 1 and 
+                               500 and X is less than or equal to Y. Solves all
+                               levels between X and Y (both inclusive).
+                         
+  -S [ --solve-all ]     Solves all levels.
+                         
+  -h [ --handle ] arg    Prepares the specified files and solves the levels 
+                         they contain.
+                         
+  -H [ --handle-all ]    Handles all files in 'data/raw/'.
+
+)DONE";
+
+void print_help_message() {
+	Options default_options;
+	printf(help_message, default_options.taps, Solver::tap_minimum(), Solver::tap_maximum());
+}
+
+Options parse_command_line_options(int argument_count, char** argument_values) {
+	Options options;
+
+	auto has_prefix = [](std::string&& s, std::string&& p) -> bool {
+		return s.compare(0, p.size(), p) == 0;
+	};
+
+	for (int index = 1; index < argument_count; index++) {
+		std::string argument = argument_values[index];
+
+		auto get_value = [&]() -> std::string {
+			index++;
+
+			if (index >= argument_count)
+				throw std::runtime_error("missing argument value for " + argument);
+
+			return argument_values[index];
+		};
+
+		auto parse_multivalue = [&](std::vector<std::string>& values) {
+			values.push_back(get_value());
+			while (index + 1 < argument_count && !has_prefix(argument_values[index+1], "-")) {
+				values.push_back(argument_values[index+1]);
+				index++;
+			}
+		};
+
+		if (argument == "--help") {
+			options.help = true;
+
+		} else if (argument == "--log" || argument == "-l") {
+			options.log = true;
+
+		} else if (argument == "--dry" || argument == "-d") {
+			options.dry = true;
+
+		} else if (argument == "--unsolved" || argument == "-u") {
+			options.unsolved = true;
+
+		} else if (argument == "--prepare-all" || argument == "-P") {
+			options.prepare_all = true;
+
+		} else if (argument == "--solve-all" || argument == "-S") {
+			options.solve_all = true;
+
+		} else if (argument == "--handle-all" || argument == "-H") {
+			options.handle_all = true;
+
+		} else if (argument == "-taps" || argument == "-t") {
+			std::string value = get_value();
+			std::regex regex("\\d{1,3}");
+			std::smatch match;
+
+			if (!regex_match(value, match, regex))
+				throw std::runtime_error("expected tap count, but found: '" + value + "'");
+
+			int parsed = std::stoi(match[0]);
+			if (parsed < Solver::tap_minimum())
+				throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_minimum()) + " or more, but was: '" + value + "'");
+			if (parsed > Solver::tap_maximum())
+				throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_maximum()) + " or less, but was: '" + value + "'");
+
+			options.taps = parsed;
+
+		} else if (argument == "--prepare" || argument == "-p") {
+			parse_multivalue(options.prepare);
+
+		} else if (argument == "--solve" || argument == "-s") {
+			parse_multivalue(options.solve);
+
+		} else if (argument == "--handle" || argument == "-h") {
+			parse_multivalue(options.handle);
+
+		} else {
+			throw std::runtime_error("unknown argument " + argument);
+		}
+	}
+
+	return options;
+}
 
 int main(int argument_count, char** argument_values) {
 	try {
-		opt::options_description description(
-			"Solves circuit500 levels.\n\n"
+		Options options = parse_command_line_options(argument_count, argument_values);
 
-			"All operations are performed in the 'data/' directory relative to the current\n"
-			"working directory, which should already exist and contain some reference images\n"
-			"for the solver inside 'data/reference/'.\n\n"
+		if (options.handle_all && !options.handle.empty())
+			throw std::runtime_error("handle is not allowed if handle-all is used");
 
-			"Screenshots of the levels should be placed inside the 'data/raw/' directory.\n\n"
+		if (options.solve_all && !options.solve.empty())
+			throw std::runtime_error("solve is not allowed if solve-all is used");
 
-			"During the preparation phase the program extracts the level number from the\n"
-			"screenshots and places a normalized version of the level area in an\n"
-			"appropriately named file inside the 'data/levels/' directory.\n\n"
+		if (options.prepare_all && !options.prepare.empty())
+			throw std::runtime_error("prepare is not allowed if prepare-all is used");
 
-			"During the solving phase the program attempts to solve the levels and\n"
-			"puts solutions in the 'data/solutions/' directory.\n\n"
-
-			"Options");
-
-		description.add_options()
-			("help",
-				"Prints this help message.\n")
-
-			("log,l",
-				"Logs statistics about the solving phase into a log file inside 'data/logs/'.\n")
-
-			("dry,d",
-				"Does not save solutions during the solving phase.\n")
-
-			("unsolved,u",
-				"Solves only those levels for which it cannot already find a solution inside "
-				"'data/solutions/'.\n")
-
-			("taps,t", opt::value<std::string>()->default_value("3"),
-				("Specifies the maximum number of taps to check for solutions.\n"
-				 "Must be between " + std::to_string(Solver::tap_minimum()) +
-				 " and " + std::to_string(Solver::tap_maximum()) + " (both inclusive).\n").c_str())
-
-			("prepare,p", opt::value<std::vector<std::string>>()->multitoken(),
-				"Prepares the specified files.\n"
-				"Must be followed by one or more filenames.\n"
-				"Filenames must not include 'data/raw/'.\n")
-
-			("prepare-all,P",
-				"Prepares all files in 'data/raw/'.\n")
-
-			("solve,s", opt::value<std::vector<std::string>>()->multitoken(),
-				"Solves the specified levels.\n"
-				"Must be followed by one or more level descriptions in the form of:\n"
-				" X:   \twhere X is a level number between 1 and 500. "
-				"Solves the specified level.\n"
-				" X-Y: \twhere X and Y are level numbers between 1 and 500 and X is less than or "
-				"equal to Y. Solves all levels between X and Y (both inclusive).\n")
-
-			("solve-all,S",
-				"Solves all levels.\n")
-
-			("handle,h", opt::value<std::vector<std::string>>()->multitoken(),
-				"Prepares the specified files and solves the levels they contain.\n")
-
-			("handle-all,H",
-				"Handles all files in 'data/raw/'.\n")
-		;
-
-		opt::options_description helper_description;
-		helper_description.add_options()
-			("__unrecognized__", opt::value<std::vector<std::string>>())
-		;
-
-		opt::options_description cmdline_options;
-		cmdline_options.add(description).add(helper_description);
-
-		opt::positional_options_description positional_description;
-		positional_description.add("__unrecognized__", -1);
-
-		opt::variables_map variables;
-		opt::store(opt::command_line_parser(argument_count, argument_values)
-			.options(cmdline_options).positional(positional_description).run(), variables);
-		opt::notify(variables);
-
-		if (variables.count("__unrecognized__"))
-			throw std::runtime_error("unexpected argument: '" + variables["__unrecognized__"].as<std::vector<std::string>>()[0] + "'");
-		check_conflicting_options(variables, "handle-all", "handle");
-		check_conflicting_options(variables, "solve-all", "solve");
-		check_conflicting_options(variables, "prepare-all", "prepare");
-
-		if (variables.count("help")) {
-			std::cout << description << std::endl;
+		if (options.help) {
+			print_help_message();
 		}
 
 		fs::path reference_dir("data/reference/");
 
 		if (!fs::is_directory(reference_dir)) {
 			std::string error("could not find directory '" + reference_dir.string() + "'");
-			if (!variables.count("help"))
+			if (!options.help)
 				error.append("; use '--help' to get more information");
 			throw std::runtime_error(error);
 		}
@@ -135,6 +205,11 @@ int main(int argument_count, char** argument_values) {
 		if (argument_count == 1) { // No options
 			std::cout << "use '--help' to get usage information" << std::endl;
 		}
+
+		auto create_directory_if_not_exists = [](fs::path path) -> bool {
+			if (fs::is_directory(path)) return true;
+			return fs::create_directory(path);
+		};
 
 		create_directory_if_not_exists("data/levels/");
 		create_directory_if_not_exists("data/raw/");
@@ -145,54 +220,35 @@ int main(int argument_count, char** argument_values) {
 		std::vector<fs::path> files_to_handle;
 		Level_Set levels_to_solve;
 
-		if (variables.count("prepare-all")) {
+		if (options.prepare_all) {
 			for (auto&& entry : fs::directory_iterator("data/raw/")) {
 				files_to_prepare.push_back(entry.path());
 			}
 		}
-		if (variables.count("prepare")) {
+		if (!options.prepare.empty()) {
 			fs::path dir = "data/raw";
-			std::vector<std::string> input_list = variables["prepare"].as<std::vector<std::string>>();
-			for (auto&& entry : input_list) {
+			for (auto&& entry : options.prepare) {
 				files_to_prepare.push_back(dir / entry);
 			}
 		}
 
-		if (variables.count("handle-all")) {
+		if (options.handle_all) {
 			for (auto&& entry : fs::directory_iterator("data/raw/")) {
 				files_to_handle.push_back(entry.path());
 			}
 		}
-		if (variables.count("handle")) {
+		if (!options.handle.empty()) {
 			fs::path dir = "data/raw";
-			std::vector<std::string> input_list = variables["handle"].as<std::vector<std::string>>();
-			for (auto&& entry : input_list) {
+			for (auto&& entry : options.handle) {
 				files_to_handle.push_back(dir / entry);
 			}	
 		}
 		
-		if (variables.count("solve-all")) {
+		if (options.solve_all) {
 			levels_to_solve.set_all();
 		}
-		if (variables.count("solve")) {
-			std::vector<std::string> input_list = variables["solve"].as<std::vector<std::string>>();
-			Level_Set_Parser(input_list, levels_to_solve).parse();
-		}
-
-		int max_taps;
-		{
-			std::string text = variables["taps"].as<std::string>();
-			std::regex regex("\\d{1,3}");
-			std::smatch match;
-
-			if (!regex_match(text, match, regex))
-				throw std::runtime_error("expected tap count, but found: '" + text + "'");
-
-			max_taps = std::stoi(match[0]);
-			if (max_taps < Solver::tap_minimum())
-				throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_minimum()) + " or more, but was: '" + text + "'");
-			if (max_taps > Solver::tap_maximum())
-				throw std::runtime_error("tap count must be " + std::to_string(Solver::tap_maximum()) + " or less, but was: '" + text + "'");
+		if (!options.solve.empty()) {
+			Level_Set_Parser(options.solve, levels_to_solve).parse();
 		}
 
 		std::string header;
@@ -201,7 +257,7 @@ int main(int argument_count, char** argument_values) {
 		// normalized means not all arguments are mentioned,
 		// the long form is always used and the order is fixed
 		{
-			if (variables.count("log"))
+			if (options.log)
 				header += " --log";
 
 			if (levels_to_solve.is_full()) {
@@ -220,20 +276,46 @@ int main(int argument_count, char** argument_values) {
 				}
 			}
 
-			if (variables.count("unsolved"))
+			if (options.unsolved)
 				header += " --unsolved";
 
-			header += " --taps " + std::to_string(max_taps);
+			header += " --taps " + std::to_string(options.taps);
 
 			if (!header.empty()) header.erase(0, 1);
 		}
 
-		Logger* logger = variables.count("log") ? Logger::create_file_logger(header) : Logger::create_fake_logger(header);
+		Logger* logger = options.log ? Logger::create_file_logger(header) : Logger::create_fake_logger(header);
 		if (!logger)
 			throw std::runtime_error("out of memory: failed to create logger");
 
-		prepare_and_handle_files(files_to_prepare, files_to_handle, levels_to_solve);
-		solve_levels(levels_to_solve, variables, max_taps, *logger);
+		{
+			Preparer preparer;
+			if (preparer.is_initialized()) {
+				int count = 0, total = files_to_prepare.size() + files_to_handle.size();
+
+				for (auto&& it : files_to_prepare) {
+					int progress = 100 * (++count) / total;
+					std::cout << std::setfill(' ') << std::setw(3) << progress << "%: " << it.generic_string() << ": ";
+					preparer.prepare(it);
+				}
+
+				for (auto&& it : files_to_handle) {
+					int progress = 100 * (++count) / total;
+					std::cout << std::setfill(' ') << std::setw(3) << progress << "%: " << it.generic_string() << ": ";
+					int level_number = preparer.prepare(it);
+					if (level_number != 0) levels_to_solve.set(level_number);
+				}
+			}
+		}
+
+		{
+			Solver solver(*logger, options.taps);
+			solver.unsolved = options.unsolved;
+			solver.dry = options.dry;
+			for (size_t i = level_begin; i != level_end; ++i)
+				if (levels_to_solve.is_set(i))
+					solver.solve_level(i);
+		}
 
 		delete logger;
 
@@ -242,47 +324,4 @@ int main(int argument_count, char** argument_values) {
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
-}
-
-void check_conflicting_options(opt::variables_map& variables, std::string master, std::string slave) {
-	if (variables.count(master) && variables.count(slave))
-			throw std::runtime_error(slave + " is not allowed if " + master + " is used");
-}
-
-bool create_directory_if_not_exists(fs::path path) {
-	if (fs::is_directory(path)) return true;
-	return fs::create_directory(path);
-}
-
-void prepare_and_handle_files(
-	std::vector<fs::path>& files_to_prepare,
-	std::vector<fs::path>& files_to_handle,
-	Level_Set& levels_to_solve) {
-
-	Preparer preparer;
-	if (!preparer.is_initialized()) return;
-
-	int count = 0, total = files_to_prepare.size() + files_to_handle.size();
-
-	for (auto&& it : files_to_prepare) {
-		int progress = 100 * (++count) / total;
-		std::cout << std::setfill(' ') << std::setw(3) << progress << "%: " << it.generic_string() << ": ";
-		preparer.prepare(it);
-	}
-
-	for (auto&& it : files_to_handle) {
-		int progress = 100 * (++count) / total;
-		std::cout << std::setfill(' ') << std::setw(3) << progress << "%: " << it.generic_string() << ": ";
-		int level_number = preparer.prepare(it);
-		if (level_number != 0) levels_to_solve.set(level_number);
-	}
-}
-
-void solve_levels(Level_Set& level_set, opt::variables_map& variables, int max_taps, Logger& logger) {
-	Solver solver(logger, max_taps);
-	solver.unsolved = variables.count("unsolved");
-	solver.dry = variables.count("dry");
-	for (size_t i = level_begin; i != level_end; ++i)
-		if (level_set.is_set(i))
-			solver.solve_level(i);
 }
